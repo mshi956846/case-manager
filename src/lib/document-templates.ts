@@ -45,11 +45,15 @@ function buildCaptionTable(data: DocumentWizardValues): TipTapNode {
   const courtUpper = data.court.toUpperCase();
   const countyUpper = data.county.toUpperCase();
 
+  const judgeRow = data.judge
+    ? captionRow("", `HONORABLE ${data.judge.toUpperCase()}`)
+    : captionRow("", "");
+
   const rows: TipTapNode[] = [
     captionRow("STATE OF INDIANA", `IN THE ${courtUpper}`),
     captionRow("", ""),
     captionRow(`COUNTY OF ${countyUpper}`, data.causeNumber ? `CAUSE NO. ${data.causeNumber}` : "CAUSE NO. __________"),
-    captionRow("", ""),
+    judgeRow,
     captionRow(
       `${data.plaintiffName.toUpperCase()},`,
       ""
@@ -86,7 +90,7 @@ function buildOpeningParagraph(data: DocumentWizardValues): TipTapNode {
 
   return paragraph([
     textNode(
-      `\tCOMES NOW the ${data.defendantRole}, ${data.defendantName}, by counsel, and respectfully files this ${label}, and in support thereof states as follows:`
+      `\t\tCOMES NOW the ${data.defendantRole}, ${data.defendantName}, by counsel, and respectfully files this ${label}, and in support thereof states as follows:`
     ),
   ]);
 }
@@ -98,7 +102,7 @@ function buildNumberedPlaceholder(): TipTapNode {
     content: [
       {
         type: "listItem",
-        content: [paragraph([textNode("\t[Enter argument here]")])],
+        content: [paragraph([textNode("\t\t[Enter argument here]")])],
       },
     ],
   };
@@ -106,20 +110,20 @@ function buildNumberedPlaceholder(): TipTapNode {
 
 function buildPrayerParagraph(data: DocumentWizardValues): TipTapNode {
   return paragraph([
-    textNode(`\tWHEREFORE, the ${data.defendantRole}, ${data.defendantName}, respectfully requests that this Court grant the relief requested herein and all other relief that is just and proper.`),
+    textNode(`\t\tWHEREFORE, the ${data.defendantRole}, ${data.defendantName}, respectfully requests that this Court grant the relief requested herein and all other relief that is just and proper.`),
   ]);
 }
 
 function buildSignatureBlock(): TipTapNode[] {
   return [
-    paragraph([textNode("Respectfully submitted,")]),
-    paragraph(),
-    paragraph([textNode("_________________________________")]),
-    paragraph([textNode("Attorney for Defendant")]),
-    paragraph([textNode("Shipman Law")]),
-    paragraph([textNode("[Address]")]),
-    paragraph([textNode("[Phone]")]),
-    paragraph([textNode("[Email]")]),
+    paragraph([textNode("Respectfully submitted,")], { textAlign: "right" }),
+    paragraph(undefined, { textAlign: "right" }),
+    paragraph([textNode("_________________________________")], { textAlign: "right" }),
+    paragraph([textNode("Attorney for Defendant")], { textAlign: "right" }),
+    paragraph([textNode("Shipman Law")], { textAlign: "right" }),
+    paragraph([textNode("[Address]")], { textAlign: "right" }),
+    paragraph([textNode("[Phone]")], { textAlign: "right" }),
+    paragraph([textNode("[Email]")], { textAlign: "right" }),
   ];
 }
 
@@ -132,15 +136,19 @@ function buildCertificateOfService(): TipTapNode[] {
     paragraph(),
     paragraph([
       textNode(
-        "I hereby certify that on _________________, a copy of the foregoing was served upon the following via the Indiana E-Filing System:"
+        "\t\tI hereby certify that on _________________, I served a copy of the foregoing document on the following counsel of record by electronically filing the foregoing document using the Indiana E-Filing System, which will send notification of such filing to:"
       ),
     ]),
     paragraph(),
     paragraph([textNode("[Opposing Counsel Name]")]),
-    paragraph([textNode("[Opposing Counsel Address]")]),
+    paragraph([textNode("[Firm Name]")]),
+    paragraph([textNode("[Address]")]),
+    paragraph([textNode("[City, State ZIP]")]),
+    paragraph([textNode("[Email]")]),
     paragraph(),
-    paragraph([textNode("_________________________________")]),
-    paragraph([textNode("Attorney for Defendant")]),
+    paragraph([textNode("/s/ _________________________________")], { textAlign: "right" }),
+    paragraph([textNode("[Attorney Name]")], { textAlign: "right" }),
+    paragraph([textNode("Attorney for Defendant")], { textAlign: "right" }),
   ];
 }
 

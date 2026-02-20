@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { INDIANA_COUNTIES, getCourtsForCounty, getCauseNumberPrefix } from "@/lib/indiana-courts";
+import { INDIANA_COUNTIES, getCourtsForCounty, getCauseNumberPrefix, getJudgeForCourt } from "@/lib/indiana-courts";
 import { MatterSelect } from "@/components/matter-select";
 import type { DocumentWizardValues } from "@/lib/validations/document-wizard";
 
@@ -22,6 +22,7 @@ export function CaptionStep() {
   const county = watch("county");
   const court = watch("court");
   const causeNumber = watch("causeNumber");
+  const judge = watch("judge");
   const plaintiffName = watch("plaintiffName");
   const plaintiffRole = watch("plaintiffRole");
   const defendantName = watch("defendantName");
@@ -33,6 +34,7 @@ export function CaptionStep() {
     setValue("county", value, { shouldValidate: true });
     setValue("court", "", { shouldValidate: false });
     setValue("causeNumber", "");
+    setValue("judge", "");
   }
 
   return (
@@ -73,6 +75,7 @@ export function CaptionStep() {
                     if (prefix) {
                       setValue("causeNumber", prefix);
                     }
+                    setValue("judge", getJudgeForCourt(v));
                   }}
                   disabled={!county}
                 >
@@ -91,13 +94,23 @@ export function CaptionStep() {
               </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label>Cause Number</Label>
-              <Input
-                placeholder="e.g. 89D03-2401-F5-000123"
-                value={causeNumber || ""}
-                onChange={(e) => setValue("causeNumber", e.target.value)}
-              />
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div className="space-y-1.5">
+                <Label>Cause Number</Label>
+                <Input
+                  placeholder="e.g. 89D03-2401-F5-000123"
+                  value={causeNumber || ""}
+                  onChange={(e) => setValue("causeNumber", e.target.value)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label>Judge</Label>
+                <Input
+                  placeholder="Judge name"
+                  value={judge || ""}
+                  onChange={(e) => setValue("judge", e.target.value)}
+                />
+              </div>
             </div>
           </div>
 
@@ -168,6 +181,7 @@ export function CaptionStep() {
               county={county}
               court={court}
               causeNumber={causeNumber}
+              judge={judge}
               plaintiffName={plaintiffName}
               plaintiffRole={plaintiffRole}
               defendantName={defendantName}
@@ -184,6 +198,7 @@ function CaptionPreview({
   county,
   court,
   causeNumber,
+  judge,
   plaintiffName,
   plaintiffRole,
   defendantName,
@@ -192,6 +207,7 @@ function CaptionPreview({
   county?: string;
   court?: string;
   causeNumber?: string;
+  judge?: string;
   plaintiffName?: string;
   plaintiffRole?: string;
   defendantName?: string;
@@ -215,7 +231,8 @@ function CaptionPreview({
     court ? `IN THE ${court.toUpperCase()}` : "IN THE __________ COURT",
     "",
     causeNumber ? `CAUSE NO. ${causeNumber}` : "CAUSE NO. __________",
-    "", "", "", "", "", "", "", "",
+    judge ? `HONORABLE ${judge.toUpperCase()}` : "",
+    "", "", "", "", "", "", "",
   ];
 
   return (

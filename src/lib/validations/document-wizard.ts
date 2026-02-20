@@ -6,6 +6,7 @@ export const documentWizardSchema = z.object({
   county: z.string().min(1, "County is required"),
   court: z.string().min(1, "Court is required"),
   causeNumber: z.string().optional().or(z.literal("")),
+  judge: z.string().optional().or(z.literal("")),
   plaintiffName: z.string().min(1, "Plaintiff name is required"),
   plaintiffRole: z.string().min(1),
   defendantName: z.string().min(1, "Defendant name is required"),

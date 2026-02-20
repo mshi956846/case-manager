@@ -15,6 +15,7 @@ export function ReviewStep() {
   const county = watch("county");
   const court = watch("court");
   const causeNumber = watch("causeNumber");
+  const judge = watch("judge");
   const plaintiffName = watch("plaintiffName");
   const plaintiffRole = watch("plaintiffRole");
   const defendantName = watch("defendantName");
@@ -55,6 +56,12 @@ export function ReviewStep() {
                 <span className="font-medium">{causeNumber}</span>
               </div>
             )}
+            {judge && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Judge</span>
+                <span className="font-medium">Honorable {judge}</span>
+              </div>
+            )}
             <Separator />
             <div className="flex justify-between">
               <span className="text-muted-foreground">{plaintiffRole || "Plaintiff"}</span>
@@ -79,7 +86,7 @@ export function ReviewStep() {
                   <CaptionRow left="STATE OF INDIANA" right={`IN THE ${court?.toUpperCase()}`} />
                   <CaptionRow left="" right="" />
                   <CaptionRow left={`COUNTY OF ${county?.toUpperCase()}`} right={causeNumber ? `CAUSE NO. ${causeNumber}` : "CAUSE NO. __________"} />
-                  <CaptionRow left="" right="" />
+                  <CaptionRow left="" right={judge ? `HONORABLE ${judge.toUpperCase()}` : ""} />
                   <CaptionRow left={`${plaintiffName?.toUpperCase()},`} right="" />
                   <CaptionRow left={`     ${plaintiffRole || "Plaintiff"},`} right="" />
                   <CaptionRow left="" right="" />

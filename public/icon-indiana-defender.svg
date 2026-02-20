@@ -1,0 +1,79 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" fill="none">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#1a2e4a"/>
+      <stop offset="100%" stop-color="#15253d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect x="10" y="10" width="180" height="180" rx="36" fill="url(#bg)"/>
+
+  <!-- Indiana State Outline (simplified, centered) -->
+  <g transform="translate(48, 18) scale(0.82)">
+    <path d="
+      M 58 8
+      L 148 5
+      L 150 8
+      L 152 5
+      L 155 8
+      L 160 6
+      L 162 9
+      L 165 7
+      L 168 10
+      L 168 14
+      L 160 16
+      L 155 20
+      L 152 28
+      L 150 40
+      L 150 60
+      L 152 80
+      L 155 100
+      L 158 115
+      L 162 128
+      L 165 138
+      L 160 148
+      L 152 158
+      L 140 168
+      L 128 178
+      L 115 185
+      L 100 190
+      L 88 192
+      L 75 190
+      L 65 185
+      L 58 178
+      L 50 168
+      L 42 155
+      L 38 142
+      L 36 128
+      L 35 110
+      L 36 90
+      L 38 70
+      L 42 50
+      L 48 32
+      L 52 20
+      L 55 12
+      Z
+    " fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="2.5"/>
+
+    <!-- Scales of Justice -->
+    <g transform="translate(100, 85)">
+      <!-- Center pillar -->
+      <line x1="0" y1="-45" x2="0" y2="35" stroke="#d4af37" stroke-width="3" stroke-linecap="round"/>
+      <!-- Base -->
+      <line x1="-16" y1="35" x2="16" y2="35" stroke="#d4af37" stroke-width="3" stroke-linecap="round"/>
+      <!-- Top ornament -->
+      <circle cx="0" cy="-48" r="5" fill="#d4af37"/>
+      <!-- Beam -->
+      <line x1="-40" y1="-28" x2="40" y2="-28" stroke="#d4af37" stroke-width="3" stroke-linecap="round"/>
+      <!-- Left chain -->
+      <line x1="-40" y1="-28" x2="-40" y2="-6" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Right chain -->
+      <line x1="40" y1="-28" x2="40" y2="-6" stroke="#d4af37" stroke-width="2.2" stroke-linecap="round"/>
+      <!-- Left pan -->
+      <path d="M -52 -6 Q -40 12 -28 -6" stroke="#d4af37" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+      <!-- Right pan -->
+      <path d="M 28 -6 Q 40 12 52 -6" stroke="#d4af37" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+    </g>
+  </g>
+</svg>
