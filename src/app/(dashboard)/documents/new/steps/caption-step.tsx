@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { INDIANA_COUNTIES, getCourtsForCounty } from "@/lib/indiana-courts";
+import { INDIANA_COUNTIES, getCourtsForCounty, getCauseNumberPrefix } from "@/lib/indiana-courts";
 import { MatterSelect } from "@/components/matter-select";
 import type { DocumentWizardValues } from "@/lib/validations/document-wizard";
 
@@ -32,6 +32,7 @@ export function CaptionStep() {
   function handleCountyChange(value: string) {
     setValue("county", value, { shouldValidate: true });
     setValue("court", "", { shouldValidate: false });
+    setValue("causeNumber", "");
   }
 
   return (
@@ -66,7 +67,13 @@ export function CaptionStep() {
                 <Label>Court</Label>
                 <Select
                   value={court || ""}
-                  onValueChange={(v) => setValue("court", v, { shouldValidate: true })}
+                  onValueChange={(v) => {
+                    setValue("court", v, { shouldValidate: true });
+                    const prefix = getCauseNumberPrefix(v);
+                    if (prefix) {
+                      setValue("causeNumber", prefix);
+                    }
+                  }}
                   disabled={!county}
                 >
                   <SelectTrigger>

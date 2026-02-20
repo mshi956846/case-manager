@@ -38,7 +38,7 @@ export function PreviewEditor({ content }: PreviewEditorProps) {
   if (!editor) return null;
 
   return (
-    <div className="prose prose-sm max-w-none">
+    <div className="prose prose-sm max-w-none" style={{ fontFamily: "'Times New Roman', Times, serif", fontSize: "12pt" }}>
       <EditorContent editor={editor} />
     </div>
   );

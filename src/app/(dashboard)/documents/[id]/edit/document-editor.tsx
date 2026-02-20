@@ -131,17 +131,10 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [editor, saveContent]);
 
-  // Court filing mode: toggle font
+  // Court filing mode: toggle layout (font is always TNR 12pt now)
   useEffect(() => {
     if (!editor) return;
-    if (courtMode) {
-      editor.chain().selectAll().setFontFamily("'Times New Roman', Times, serif").run();
-      // Refocus to end
-      editor.commands.focus("end");
-    } else {
-      editor.chain().selectAll().unsetFontFamily().run();
-      editor.commands.focus("end");
-    }
+    editor.commands.focus("end");
   }, [courtMode, editor]);
 
   // Word count on initial load
@@ -283,15 +276,15 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
       </div>
 
       <style jsx global>{`
-        .court-filing-mode .ProseMirror {
+        .ProseMirror {
           font-family: 'Times New Roman', Times, serif;
           font-size: 12pt;
+        }
+        .court-filing-mode .ProseMirror {
           line-height: 2;
           padding-left: 4rem;
         }
         .court-filing-editor .ProseMirror {
-          font-family: 'Times New Roman', Times, serif;
-          font-size: 12pt;
           line-height: 2;
           padding-left: 4rem;
         }
