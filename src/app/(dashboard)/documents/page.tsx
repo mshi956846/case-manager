@@ -5,7 +5,6 @@ import { DocumentsClient } from "./documents-client";
 
 export default async function DocumentsPage() {
   const documents = await prisma.document.findMany({
-    where: { documentType: "WORD_PROCESSOR" },
     orderBy: { updatedAt: "desc" },
     include: { matter: { select: { id: true, title: true, caseNumber: true } } },
   });
