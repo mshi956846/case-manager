@@ -10,6 +10,10 @@ import UnderlineExt from "@tiptap/extension-underline";
 import { TextStyle } from "@tiptap/extension-text-style";
 import FontFamily from "@tiptap/extension-font-family";
 import Placeholder from "@tiptap/extension-placeholder";
+import { Table } from "@tiptap/extension-table";
+import { TableRow } from "@tiptap/extension-table-row";
+import { TableCell } from "@tiptap/extension-table-cell";
+import { TableHeader } from "@tiptap/extension-table-header";
 import { toast } from "sonner";
 import { ArrowLeft, Save, FileDown, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -50,6 +54,10 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
       Placeholder.configure({
         placeholder: "Start writing your document...",
       }),
+      Table.configure({ resizable: false }),
+      TableRow,
+      TableCell,
+      TableHeader,
     ],
     content: initialDoc.content || { type: "doc", content: [{ type: "paragraph" }] },
     onUpdate: ({ editor }) => {
@@ -286,6 +294,20 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
           font-size: 12pt;
           line-height: 2;
           padding-left: 4rem;
+        }
+        .ProseMirror table {
+          border-collapse: collapse;
+          width: 100%;
+        }
+        .ProseMirror td,
+        .ProseMirror th {
+          border: 1px dashed transparent;
+          padding: 2px 4px;
+          vertical-align: top;
+        }
+        .ProseMirror table:hover td,
+        .ProseMirror table:hover th {
+          border-color: hsl(var(--border));
         }
       `}</style>
     </div>
