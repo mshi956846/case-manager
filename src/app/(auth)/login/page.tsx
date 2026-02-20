@@ -38,17 +38,17 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 shadow-lg shadow-indigo-500/30 ring-1 ring-white/20 overflow-hidden">
+        <div className="mx-auto mb-4 flex h-20 w-20 items-center justify-center rounded-2xl bg-white/20 shadow-lg shadow-indigo-500/30 ring-1 ring-white/20 overflow-hidden">
           <Image
             src="/icon-indiana-defender.svg"
             alt="Indiana Defender"
-            width={64}
-            height={64}
+            width={80}
+            height={80}
             className="h-full w-full"
           />
         </div>
-        <h1 className="text-2xl font-bold text-white">Indiana Defender</h1>
-        <p className="mt-1 text-sm font-medium text-white/70">
+        <h1 className="text-3xl font-bold text-white">Indiana Defender</h1>
+        <p className="mt-1 text-base font-medium text-white/70">
           Criminal Defense Case Management
         </p>
       </div>

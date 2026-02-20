@@ -43,20 +43,20 @@ export function AppSidebar() {
       }}
     >
       <div className="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden shadow-md shadow-indigo-500/25">
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg overflow-hidden shadow-md shadow-indigo-500/25">
           <Image
             src="/icon-indiana-defender.svg"
             alt="Indiana Defender"
-            width={36}
-            height={36}
+            width={40}
+            height={40}
             className="h-full w-full"
           />
         </div>
         <div className="flex flex-col">
-          <span className="text-sm font-bold tracking-tight text-sidebar-primary-foreground">
+          <span className="text-base font-bold tracking-tight text-sidebar-primary-foreground">
             Indiana Defender
           </span>
-          <span className="text-[10px] text-sidebar-foreground/60">
+          <span className="text-xs text-sidebar-foreground/60">
             Criminal Defense Case Management
           </span>
         </div>
