@@ -3,10 +3,10 @@
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Scale } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -38,12 +38,18 @@ export default function LoginPage() {
   return (
     <div className="w-full max-w-sm rounded-2xl border border-white/10 bg-white/10 p-8 shadow-2xl backdrop-blur-xl">
       <div className="mb-6 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 shadow-lg shadow-indigo-500/30 ring-1 ring-white/20">
-          <Scale className="h-8 w-8 text-white" />
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/20 shadow-lg shadow-indigo-500/30 ring-1 ring-white/20 overflow-hidden">
+          <Image
+            src="/icon-indiana-defender.svg"
+            alt="Indiana Defender"
+            width={64}
+            height={64}
+            className="h-full w-full"
+          />
         </div>
-        <h1 className="text-2xl font-bold text-white">Shipman Law, LLC</h1>
+        <h1 className="text-2xl font-bold text-white">Indiana Defender</h1>
         <p className="mt-1 text-sm font-medium text-white/70">
-          Streamline your practice
+          Criminal Defense Case Management
         </p>
       </div>
       <form onSubmit={onSubmit} className="flex flex-col gap-4">

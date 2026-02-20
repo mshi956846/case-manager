@@ -120,7 +120,7 @@ function buildSignatureBlock(): TipTapNode[] {
     paragraph(undefined, { textAlign: "right" }),
     paragraph([textNode("_________________________________")], { textAlign: "right" }),
     paragraph([textNode("Attorney for Defendant")], { textAlign: "right" }),
-    paragraph([textNode("Shipman Law")], { textAlign: "right" }),
+    paragraph([textNode("Indiana Defender")], { textAlign: "right" }),
     paragraph([textNode("[Address]")], { textAlign: "right" }),
     paragraph([textNode("[Phone]")], { textAlign: "right" }),
     paragraph([textNode("[Email]")], { textAlign: "right" }),

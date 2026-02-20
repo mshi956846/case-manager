@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { signOut } from "next-auth/react";
 import { cn } from "@/lib/utils";
@@ -14,7 +15,6 @@ import {
   FileText,
   FileEdit,
   LogOut,
-  Scale,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -43,15 +43,21 @@ export function AppSidebar() {
       }}
     >
       <div className="flex h-16 items-center gap-3 border-b border-white/10 px-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-md shadow-indigo-500/25">
-          <Scale className="h-5 w-5" />
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg overflow-hidden shadow-md shadow-indigo-500/25">
+          <Image
+            src="/icon-indiana-defender.svg"
+            alt="Indiana Defender"
+            width={36}
+            height={36}
+            className="h-full w-full"
+          />
         </div>
         <div className="flex flex-col">
           <span className="text-sm font-bold tracking-tight text-sidebar-primary-foreground">
-            Shipman Law
+            Indiana Defender
           </span>
-          <span className="text-xs text-sidebar-foreground/60">
-            Case Manager
+          <span className="text-[10px] text-sidebar-foreground/60">
+            Criminal Defense Case Management
           </span>
         </div>
       </div>
