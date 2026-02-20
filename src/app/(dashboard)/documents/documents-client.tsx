@@ -5,11 +5,12 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { Document } from "@prisma/client";
-import { MoreHorizontal, Plus, FileDown, Eye, Pencil, Trash2 } from "lucide-react";
+import { MoreHorizontal, Plus, FileDown, Eye, Pencil, Trash2, Download, FileText, FileEdit, RefreshCw, Wand2 } from "lucide-react";
 import { format } from "date-fns";
 import { toast } from "sonner";
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,6 +34,7 @@ export function DocumentsClient({
   const [formOpen, setFormOpen] = useState(false);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [converting, setConverting] = useState<string | null>(null);
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -53,27 +55,52 @@ export function DocumentsClient({
     }
   }
 
-  async function handleExport(id: string, format: "docx" | "pdf") {
+  async function handleExport(id: string, fmt: "docx" | "pdf") {
     try {
-      const res = await fetch(`/api/documents/${id}/export-${format}`, {
+      const res = await fetch(`/api/documents/${id}/export-${fmt}`, {
         method: "POST",
       });
       if (!res.ok) {
-        toast.error(`Failed to export ${format.toUpperCase()}`);
+        toast.error(`Failed to export ${fmt.toUpperCase()}`);
         return;
       }
       const blob = await res.blob();
       const url = URL.createObjectURL(blob);
       const a = window.document.createElement("a");
       a.href = url;
-      a.download = res.headers.get("Content-Disposition")?.split("filename=")[1]?.replace(/"/g, "") || `document.${format}`;
+      a.download = res.headers.get("Content-Disposition")?.split("filename=")[1]?.replace(/"/g, "") || `document.${fmt}`;
       window.document.body.appendChild(a);
       a.click();
       window.document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      toast.success(`${format.toUpperCase()} exported`);
+      toast.success(`${fmt.toUpperCase()} exported`);
     } catch {
       toast.error("Export failed. Please try again.");
+    }
+  }
+
+  function handleDownload(id: string) {
+    window.open(`/api/documents/${id}/download`, "_blank");
+  }
+
+  async function handleConvert(id: string) {
+    setConverting(id);
+    try {
+      const res = await fetch(`/api/documents/${id}/convert`, { method: "POST" });
+      if (res.ok) {
+        const data = await res.json();
+        toast.success("Document converted to editable format");
+        router.refresh();
+        // Navigate to the new editable document
+        router.push(`/documents/${data.id}/edit`);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        toast.error(data.error || "Failed to convert document");
+      }
+    } catch {
+      toast.error("Network error. Please try again.");
+    } finally {
+      setConverting(null);
     }
   }
 
@@ -81,13 +108,42 @@ export function DocumentsClient({
     {
       accessorKey: "name",
       header: "Name",
+      cell: ({ row }) => {
+        const doc = row.original;
+        const isWP = doc.documentType === "WORD_PROCESSOR";
+        return (
+          <div className="flex items-center gap-2">
+            {isWP ? (
+              <FileEdit className="h-4 w-4 text-blue-500 shrink-0" />
+            ) : (
+              <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
+            )}
+            {isWP ? (
+              <Link
+                href={`/documents/${doc.id}`}
+                className="font-medium hover:underline"
+              >
+                {doc.name}
+              </Link>
+            ) : (
+              <button
+                onClick={() => handleDownload(doc.id)}
+                className="font-medium hover:underline text-left"
+              >
+                {doc.name}
+              </button>
+            )}
+          </div>
+        );
+      },
+    },
+    {
+      accessorKey: "documentType",
+      header: "Type",
       cell: ({ row }) => (
-        <Link
-          href={`/documents/${row.original.id}`}
-          className="font-medium hover:underline"
-        >
-          {row.original.name}
-        </Link>
+        <Badge variant="outline" className="text-xs">
+          {row.original.documentType === "WORD_PROCESSOR" ? "Draft" : row.original.mimeType === "application/pdf" ? "PDF" : "File"}
+        </Badge>
       ),
     },
     {
@@ -109,62 +165,86 @@ export function DocumentsClient({
       accessorKey: "updatedAt",
       header: "Last Modified",
       cell: ({ row }) =>
-        format(new Date(row.original.updatedAt), "MMM d, yyyy h:mm a"),
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Created",
-      cell: ({ row }) =>
-        format(new Date(row.original.createdAt), "MMM d, yyyy"),
+        format(new Date(row.original.updatedAt), "MMM d, yyyy"),
     },
     {
       id: "actions",
-      cell: ({ row }) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem asChild>
-              <Link href={`/documents/${row.original.id}`}>
-                <Eye className="mr-2 h-4 w-4" />
-                View
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href={`/documents/${row.original.id}/edit`}>
-                <Pencil className="mr-2 h-4 w-4" />
-                Edit
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => handleExport(row.original.id, "docx")}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Export DOCX
-            </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => handleExport(row.original.id, "pdf")}>
-              <FileDown className="mr-2 h-4 w-4" />
-              Export PDF
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              className="text-destructive"
-              onClick={() => setDeleteId(row.original.id)}
-            >
-              <Trash2 className="mr-2 h-4 w-4" />
-              Delete
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      cell: ({ row }) => {
+        const doc = row.original;
+        const isWP = doc.documentType === "WORD_PROCESSOR";
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              {isWP ? (
+                <>
+                  <DropdownMenuItem asChild>
+                    <Link href={`/documents/${doc.id}`}>
+                      <Eye className="mr-2 h-4 w-4" />
+                      View
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href={`/documents/${doc.id}/edit`}>
+                      <Pencil className="mr-2 h-4 w-4" />
+                      Edit
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => handleExport(doc.id, "docx")}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Export DOCX
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleExport(doc.id, "pdf")}>
+                    <FileDown className="mr-2 h-4 w-4" />
+                    Export PDF
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => handleDownload(doc.id)}>
+                    <Download className="mr-2 h-4 w-4" />
+                    Download
+                  </DropdownMenuItem>
+                  {doc.mimeType === "application/pdf" && (
+                    <DropdownMenuItem
+                      onClick={() => handleConvert(doc.id)}
+                      disabled={converting === doc.id}
+                    >
+                      <RefreshCw className={`mr-2 h-4 w-4 ${converting === doc.id ? "animate-spin" : ""}`} />
+                      {converting === doc.id ? "Converting..." : "Convert to Editable"}
+                    </DropdownMenuItem>
+                  )}
+                </>
+              )}
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                className="text-destructive"
+                onClick={() => setDeleteId(doc.id)}
+              >
+                <Trash2 className="mr-2 h-4 w-4" />
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        );
+      },
     },
   ];
 
   return (
     <>
-      <div className="flex justify-end">
+      <div className="flex justify-end gap-2">
+        <Button variant="outline" asChild>
+          <Link href="/documents/new">
+            <Wand2 className="mr-2 h-4 w-4" />
+            Build from Template
+          </Link>
+        </Button>
         <Button onClick={() => setFormOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
           New Document
