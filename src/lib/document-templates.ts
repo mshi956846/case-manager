@@ -86,7 +86,7 @@ function buildOpeningParagraph(data: DocumentWizardValues): TipTapNode {
 
   return paragraph([
     textNode(
-      `COMES NOW the ${data.defendantRole}, ${data.defendantName}, by counsel, and respectfully files this ${label}, and in support thereof states as follows:`
+      `\tCOMES NOW the ${data.defendantRole}, ${data.defendantName}, by counsel, and respectfully files this ${label}, and in support thereof states as follows:`
     ),
   ]);
 }
@@ -98,7 +98,7 @@ function buildNumberedPlaceholder(): TipTapNode {
     content: [
       {
         type: "listItem",
-        content: [paragraph([textNode("[Enter argument here]")])],
+        content: [paragraph([textNode("\t[Enter argument here]")])],
       },
     ],
   };
@@ -106,8 +106,7 @@ function buildNumberedPlaceholder(): TipTapNode {
 
 function buildPrayerParagraph(data: DocumentWizardValues): TipTapNode {
   return paragraph([
-    textNode("WHEREFORE, "),
-    textNode(`the ${data.defendantRole}, ${data.defendantName}, respectfully requests that this Court grant the relief requested herein and all other relief that is just and proper.`),
+    textNode(`\tWHEREFORE, the ${data.defendantRole}, ${data.defendantName}, respectfully requests that this Court grant the relief requested herein and all other relief that is just and proper.`),
   ]);
 }
 
