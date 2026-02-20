@@ -98,7 +98,7 @@ export function DocumentForm({ open, onOpenChange }: DocumentFormProps) {
               name="matterId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Matter (optional)</FormLabel>
+                  <FormLabel>Case (optional)</FormLabel>
                   <FormControl>
                     <MatterSelect
                       value={field.value}

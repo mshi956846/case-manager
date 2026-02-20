@@ -148,7 +148,7 @@ export function DocumentsClient({
     },
     {
       accessorKey: "matter",
-      header: "Matter",
+      header: "Case",
       cell: ({ row }) =>
         row.original.matter ? (
           <Link

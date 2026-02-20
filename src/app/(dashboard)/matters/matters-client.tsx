@@ -55,10 +55,10 @@ export function MattersClient({
     try {
       const res = await fetch(`/api/matters/${deleteId}`, { method: "DELETE" });
       if (res.ok) {
-        toast.success("Matter deleted");
+        toast.success("Case deleted");
         router.refresh();
       } else {
-        toast.error("Failed to delete matter");
+        toast.error("Failed to delete case");
       }
     } catch {
       toast.error("Network error. Please try again.");
@@ -159,14 +159,14 @@ export function MattersClient({
           }}
         >
           <Plus className="mr-2 h-4 w-4" />
-          New Matter
+          New Case
         </Button>
       </div>
       <DataTable
         columns={columns}
         data={filtered}
         searchKey="title"
-        searchPlaceholder="Search matters..."
+        searchPlaceholder="Search cases..."
       />
       {formOpen && (
         <MatterForm
@@ -181,8 +181,8 @@ export function MattersClient({
       <ConfirmDialog
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
-        title="Delete Matter"
-        description="This will permanently delete this matter and all associated data."
+        title="Delete Case"
+        description="This will permanently delete this case and all associated data."
         onConfirm={handleDelete}
         loading={deleting}
       />

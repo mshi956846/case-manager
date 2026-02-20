@@ -154,7 +154,7 @@ export default async function MatterDetailPage({
             <CardContent className="pt-6">
               {matter.contacts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
-                  No contacts linked to this matter.
+                  No contacts linked to this case.
                 </p>
               ) : (
                 <Table>

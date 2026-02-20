@@ -55,15 +55,15 @@ export function MatterSelect({ value, onValueChange }: MatterSelectProps) {
         >
           {selected
             ? `${selected.title}${selected.caseNumber ? ` (#${selected.caseNumber})` : ""}`
-            : "Select matter..."}
+            : "Select case..."}
           <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-full p-0">
         <Command>
-          <CommandInput placeholder="Search matters..." />
+          <CommandInput placeholder="Search cases..." />
           <CommandList>
-            <CommandEmpty>No matters found.</CommandEmpty>
+            <CommandEmpty>No cases found.</CommandEmpty>
             <CommandGroup>
               {matters.map((matter) => (
                 <CommandItem

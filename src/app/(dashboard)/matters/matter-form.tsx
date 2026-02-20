@@ -96,7 +96,7 @@ export function MatterForm({ open, onOpenChange, matter }: MatterFormProps) {
       });
 
       if (res.ok) {
-        toast.success(isEditing ? "Matter updated" : "Matter created");
+        toast.success(isEditing ? "Case updated" : "Case created");
         form.reset();
         onOpenChange(false);
         router.refresh();
@@ -114,7 +114,7 @@ export function MatterForm({ open, onOpenChange, matter }: MatterFormProps) {
       <DialogContent className="max-w-lg">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? "Edit Matter" : "New Matter"}
+            {isEditing ? "Edit Case" : "New Case"}
           </DialogTitle>
         </DialogHeader>
         <Form {...form}>

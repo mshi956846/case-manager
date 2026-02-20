@@ -104,7 +104,7 @@ export default async function DashboardPage() {
 
   const statCards = [
     {
-      title: "Open Matters",
+      title: "Open Cases",
       value: stats.openMatters,
       icon: Briefcase,
       iconColor: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
@@ -166,7 +166,7 @@ export default async function DashboardPage() {
         <Card className="border-t-2 border-t-blue-500/40">
           <CardHeader>
             <CardTitle className="flex items-center justify-between">
-              Recent Matters
+              Recent Cases
               <Link
                 href="/matters"
                 className="group flex items-center gap-1 text-sm font-normal text-muted-foreground hover:text-primary"
@@ -178,7 +178,7 @@ export default async function DashboardPage() {
           </CardHeader>
           <CardContent>
             {recentMatters.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No matters yet.</p>
+              <p className="text-sm text-muted-foreground">No cases yet.</p>
             ) : (
               <div className="space-y-3">
                 {recentMatters.map((matter) => (
@@ -232,7 +232,7 @@ export default async function DashboardPage() {
                       <div>
                         <div className="text-sm font-medium">{task.title}</div>
                         <div className="text-xs text-muted-foreground">
-                          {task.matter?.title ?? "No matter"}
+                          {task.matter?.title ?? "No case"}
                           {task.dueDate &&
                             ` - Due ${format(new Date(task.dueDate), "MMM d")}`}
                         </div>

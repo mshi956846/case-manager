@@ -21,7 +21,7 @@ export default async function MattersPage() {
             <Briefcase className="h-5 w-5" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold">Matters</h1>
+            <h1 className="text-2xl font-bold">Cases</h1>
             <p className="text-sm text-muted-foreground">
               Manage your active cases and legal matters
             </p>

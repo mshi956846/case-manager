@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { CalendarEvent, EventType, Matter } from "@prisma/client";
 import {
@@ -41,6 +41,9 @@ export function CalendarClient({ events }: { events: EventWithMatter[] }) {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [today, setToday] = useState<Date | null>(null);
+
+  useEffect(() => setToday(new Date()), []);
 
   const monthStart = startOfMonth(currentMonth);
   const monthEnd = endOfMonth(currentMonth);
@@ -120,7 +123,7 @@ export function CalendarClient({ events }: { events: EventWithMatter[] }) {
           {days.map((day) => {
             const dayEvents = getEventsForDay(day);
             const isCurrentMonth = isSameMonth(day, currentMonth);
-            const isToday = isSameDay(day, new Date());
+            const isToday = today ? isSameDay(day, today) : false;
 
             return (
               <div

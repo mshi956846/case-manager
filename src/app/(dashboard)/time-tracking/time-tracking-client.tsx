@@ -120,7 +120,7 @@ export function TimeTrackingClient({
       },
       {
         id: "matter",
-        header: "Matter",
+        header: "Case",
         cell: ({ row }) =>
           row.original.matter ? (
             <Link

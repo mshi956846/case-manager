@@ -84,7 +84,7 @@ export function ContactsClient({
     { accessorKey: "company", header: "Company" },
     {
       id: "matters",
-      header: "Matters",
+      header: "Cases",
       cell: ({ row }) => row.original._count.matters,
     },
     {
@@ -148,7 +148,7 @@ export function ContactsClient({
         open={!!deleteId}
         onOpenChange={(open) => !open && setDeleteId(null)}
         title="Delete Contact"
-        description="This will permanently delete this contact and remove them from all matters."
+        description="This will permanently delete this contact and remove them from all cases."
         onConfirm={handleDelete}
         loading={deleting}
       />

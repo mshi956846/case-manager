@@ -23,10 +23,10 @@ import { Separator } from "@/components/ui/separator";
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/contacts", label: "Contacts", icon: Users },
-  { href: "/matters", label: "Matters", icon: Briefcase },
+  { href: "/matters", label: "Cases", icon: Briefcase },
+  { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/documents", label: "Documents", icon: FileEdit },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
-  { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/time-tracking", label: "Time Tracking", icon: Clock },
   { href: "/invoices", label: "Invoices", icon: FileText },
 ];

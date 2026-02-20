@@ -89,11 +89,11 @@ export default async function ContactDetailPage({
 
         <Card className="border-l-4 border-l-blue-500">
           <CardHeader>
-            <CardTitle>Related Matters</CardTitle>
+            <CardTitle>Related Cases</CardTitle>
           </CardHeader>
           <CardContent>
             {contact.matters.length === 0 ? (
-              <p className="text-sm text-muted-foreground">No matters linked.</p>
+              <p className="text-sm text-muted-foreground">No cases linked.</p>
             ) : (
               <div className="space-y-2">
                 {contact.matters.map((mc) => (
