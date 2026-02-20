@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Mail, Phone, MapPin, Building } from "lucide-react";
+import { ArrowLeft, Mail, Phone, MapPin, Building, Users } from "lucide-react";
 
 const typeLabels: Record<string, string> = {
   CLIENT: "Client",
@@ -40,6 +40,9 @@ export default async function ContactDetailPage({
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
+          <Users className="h-5 w-5" />
+        </div>
         <div>
           <h1 className="text-2xl font-bold">{contact.name}</h1>
           <Badge variant="secondary">{typeLabels[contact.type]}</Badge>
@@ -47,7 +50,7 @@ export default async function ContactDetailPage({
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="border-l-4 border-l-violet-500">
           <CardHeader>
             <CardTitle>Contact Information</CardTitle>
           </CardHeader>
@@ -84,7 +87,7 @@ export default async function ContactDetailPage({
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-blue-500">
           <CardHeader>
             <CardTitle>Related Matters</CardTitle>
           </CardHeader>
@@ -97,7 +100,7 @@ export default async function ContactDetailPage({
                   <Link
                     key={mc.id}
                     href={`/matters/${mc.matter.id}`}
-                    className="block rounded-md border p-3 text-sm hover:bg-muted transition-colors"
+                    className="block rounded-md border p-3 text-sm transition-all hover:border-blue-200 hover:bg-blue-50/50"
                   >
                     <div className="font-medium">{mc.matter.title}</div>
                     <div className="text-muted-foreground">

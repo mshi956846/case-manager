@@ -5,7 +5,7 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { format } from "date-fns";
 import { toast } from "sonner";
-import { ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -148,6 +148,9 @@ export default function InvoiceDetailPage() {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
+          <FileText className="h-5 w-5" />
+        </div>
         <div>
           <h1 className="text-2xl font-bold">
             Invoice {invoice.invoiceNumber}
@@ -159,7 +162,7 @@ export default function InvoiceDetailPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
-        <Card>
+        <Card className="border-l-4 border-l-teal-500">
           <CardHeader>
             <CardTitle>Details</CardTitle>
           </CardHeader>
@@ -209,7 +212,7 @@ export default function InvoiceDetailPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border-l-4 border-l-emerald-500">
           <CardHeader>
             <CardTitle>Summary</CardTitle>
           </CardHeader>
@@ -223,9 +226,9 @@ export default function InvoiceDetailPage() {
               <span>${invoice.tax.toFixed(2)}</span>
             </div>
             <Separator />
-            <div className="flex justify-between font-bold text-lg">
+            <div className="flex justify-between text-lg font-bold">
               <span>Total</span>
-              <span>${invoice.total.toFixed(2)}</span>
+              <span className="text-emerald-700">${invoice.total.toFixed(2)}</span>
             </div>
           </CardContent>
         </Card>

@@ -16,19 +16,19 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Briefcase } from "lucide-react";
 
 const statusConfig: Record<string, string> = {
-  OPEN: "bg-blue-100 text-blue-800 border-blue-200",
-  PENDING: "bg-amber-100 text-amber-800 border-amber-200",
-  CLOSED: "bg-gray-100 text-gray-800 border-gray-200",
+  OPEN: "bg-blue-100 text-blue-800 border-blue-300",
+  PENDING: "bg-amber-100 text-amber-800 border-amber-300",
+  CLOSED: "bg-gray-100 text-gray-800 border-gray-300",
 };
 
 const priorityConfig: Record<string, string> = {
-  LOW: "bg-slate-100 text-slate-700 border-slate-200",
-  MEDIUM: "bg-blue-100 text-blue-800 border-blue-200",
-  HIGH: "bg-orange-100 text-orange-800 border-orange-200",
-  URGENT: "bg-red-100 text-red-800 border-red-200",
+  LOW: "bg-slate-100 text-slate-700 border-slate-300",
+  MEDIUM: "bg-blue-100 text-blue-800 border-blue-300",
+  HIGH: "bg-orange-100 text-orange-800 border-orange-300",
+  URGENT: "bg-red-100 text-red-800 border-red-300",
 };
 
 export default async function MatterDetailPage({
@@ -64,9 +64,12 @@ export default async function MatterDetailPage({
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
+        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+          <Briefcase className="h-5 w-5" />
+        </div>
         <div>
           <h1 className="text-2xl font-bold">{matter.title}</h1>
-          <div className="flex items-center gap-2 mt-1">
+          <div className="mt-1 flex items-center gap-2">
             <span className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${statusConfig[matter.status]}`}>{matter.status}</span>
             {matter.caseNumber && (
               <span className="text-sm text-muted-foreground">
@@ -100,7 +103,7 @@ export default async function MatterDetailPage({
         </TabsList>
 
         <TabsContent value="overview" className="space-y-4">
-          <Card>
+          <Card className="border-l-4 border-l-blue-500">
             <CardHeader>
               <CardTitle>Details</CardTitle>
             </CardHeader>
@@ -147,7 +150,7 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="contacts">
-          <Card>
+          <Card className="border-l-4 border-l-violet-500">
             <CardContent className="pt-6">
               {matter.contacts.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
@@ -189,7 +192,7 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="tasks">
-          <Card>
+          <Card className="border-l-4 border-l-amber-500">
             <CardContent className="pt-6">
               {matter.tasks.length === 0 ? (
                 <p className="text-sm text-muted-foreground">No tasks yet.</p>
@@ -228,7 +231,7 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="time">
-          <Card>
+          <Card className="border-l-4 border-l-purple-500">
             <CardContent className="pt-6">
               {matter.timeEntries.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
@@ -266,7 +269,7 @@ export default async function MatterDetailPage({
         </TabsContent>
 
         <TabsContent value="documents">
-          <Card>
+          <Card className="border-l-4 border-l-emerald-500">
             <CardContent className="pt-6">
               {matter.documents.length === 0 ? (
                 <p className="text-sm text-muted-foreground">
