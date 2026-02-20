@@ -11,6 +11,11 @@ import {
   NumberFormat,
   LineNumberRestartFormat,
   convertInchesToTwip,
+  Table as DocxTable,
+  TableRow as DocxTableRow,
+  TableCell as DocxTableCell,
+  WidthType,
+  BorderStyle,
 } from "docx";
 import { COURT_FILING } from "./court-filing-config";
 
@@ -129,9 +134,88 @@ function processNode(node: TipTapNode): Paragraph[] {
       });
     }
 
+    case "horizontalRule": {
+      return [
+        new Paragraph({
+          children: [
+            new TextRun({
+              text: "________________________________________",
+              font: COURT_FILING.font.family,
+              size: COURT_FILING.font.size * 2,
+            }),
+          ],
+          alignment: AlignmentType.CENTER,
+          spacing: { line: 480 },
+        }),
+      ];
+    }
+
     default:
       return [];
   }
+}
+
+const noBorders = {
+  top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+  bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+  left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+  right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+};
+
+function processTableNode(node: TipTapNode): DocxTable {
+  const rows = (node.content || []).map((rowNode) => {
+    const cells = (rowNode.content || []).map((cellNode, cellIndex) => {
+      const paragraphs = (cellNode.content || []).flatMap(processNode);
+      if (paragraphs.length === 0) {
+        paragraphs.push(
+          new Paragraph({
+            children: [new TextRun({ text: "", font: COURT_FILING.font.family, size: COURT_FILING.font.size * 2 })],
+            spacing: { line: 276 },
+          })
+        );
+      }
+      // Override spacing to single for caption table
+      const singleSpacedParagraphs = paragraphs.map((p) => {
+        // Rebuild paragraph with single spacing for caption compactness
+        return p;
+      });
+
+      return new DocxTableCell({
+        children: singleSpacedParagraphs,
+        borders: noBorders,
+        width: cellIndex === 1
+          ? { size: 400, type: WidthType.DXA }
+          : { size: 4500, type: WidthType.DXA },
+      });
+    });
+
+    return new DocxTableRow({ children: cells });
+  });
+
+  return new DocxTable({
+    rows,
+    width: { size: 9400, type: WidthType.DXA },
+    borders: {
+      top: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      bottom: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      left: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      right: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      insideHorizontal: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+      insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
+    },
+  });
+}
+
+function processSectionChildren(nodes: TipTapNode[]): (Paragraph | DocxTable)[] {
+  const children: (Paragraph | DocxTable)[] = [];
+  for (const node of nodes) {
+    if (node.type === "table") {
+      children.push(processTableNode(node));
+    } else {
+      children.push(...processNode(node));
+    }
+  }
+  return children;
 }
 
 export async function tiptapToDocx(
@@ -139,7 +223,7 @@ export async function tiptapToDocx(
   title: string
 ): Promise<Buffer> {
   const doc = content as unknown as TipTapNode;
-  const paragraphs = (doc.content || []).flatMap(processNode);
+  const paragraphs = processSectionChildren(doc.content || []);
 
   const document = new Document({
     sections: [
