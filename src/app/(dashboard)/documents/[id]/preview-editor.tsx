@@ -24,6 +24,7 @@ export function PreviewEditor({ content }: PreviewEditorProps) {
     ],
     content: content || { type: "doc", content: [{ type: "paragraph" }] },
     editable: false,
+    immediatelyRender: false,
   });
 
   if (!editor) return null;

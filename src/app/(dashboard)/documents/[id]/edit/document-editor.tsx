@@ -67,6 +67,7 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
         class: "outline-none min-h-[800px] px-16 py-12",
       },
     },
+    immediatelyRender: false,
   });
 
   const saveContent = useCallback(
