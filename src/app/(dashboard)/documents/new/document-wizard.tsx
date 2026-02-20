@@ -36,7 +36,7 @@ export function DocumentWizard() {
       county: "",
       court: "",
       causeNumber: "",
-      plaintiffName: "",
+      plaintiffName: "State of Indiana",
       plaintiffRole: "Plaintiff",
       defendantName: "",
       defendantRole: "Defendant",
