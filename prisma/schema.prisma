@@ -1,0 +1,210 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  name      String
+  firmName  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Contact {
+  id        String      @id @default(cuid())
+  name      String
+  email     String?
+  phone     String?
+  address   String?
+  type      ContactType @default(CLIENT)
+  company   String?
+  notes     String?
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+
+  matters  MatterContact[]
+  invoices Invoice[]
+}
+
+enum ContactType {
+  CLIENT
+  OPPOSING_PARTY
+  WITNESS
+  JUDGE
+  OTHER
+}
+
+model Matter {
+  id                   String       @id @default(cuid())
+  title                String
+  caseNumber           String?      @unique
+  status               MatterStatus @default(OPEN)
+  practiceArea         String?
+  description          String?
+  openDate             DateTime     @default(now())
+  closeDate            DateTime?
+  statuteOfLimitations DateTime?
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  contacts    MatterContact[]
+  tasks       Task[]
+  timeEntries TimeEntry[]
+  documents   Document[]
+  invoices    Invoice[]
+  events      CalendarEvent[]
+}
+
+enum MatterStatus {
+  OPEN
+  PENDING
+  CLOSED
+}
+
+model MatterContact {
+  id        String            @id @default(cuid())
+  role      MatterContactRole @default(CLIENT)
+  matterId  String
+  contactId String
+  matter    Matter            @relation(fields: [matterId], references: [id], onDelete: Cascade)
+  contact   Contact           @relation(fields: [contactId], references: [id], onDelete: Cascade)
+
+  @@unique([matterId, contactId])
+}
+
+enum MatterContactRole {
+  CLIENT
+  OPPOSING_PARTY
+  WITNESS
+  JUDGE
+  EXPERT
+  OTHER
+}
+
+model Task {
+  id          String     @id @default(cuid())
+  title       String
+  description String?
+  dueDate     DateTime?
+  priority    Priority   @default(MEDIUM)
+  status      TaskStatus @default(TODO)
+  matterId    String?
+  matter      Matter?    @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
+
+enum TaskStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
+model CalendarEvent {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  startDate   DateTime
+  endDate     DateTime?
+  allDay      Boolean   @default(false)
+  type        EventType @default(MEETING)
+  matterId    String?
+  matter      Matter?   @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+enum EventType {
+  HEARING
+  DEADLINE
+  MEETING
+  REMINDER
+}
+
+model TimeEntry {
+  id              String   @id @default(cuid())
+  description     String
+  date            DateTime
+  durationMinutes Int
+  hourlyRate      Float    @default(0)
+  billable        Boolean  @default(true)
+  matterId        String?
+  matter          Matter?  @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  invoiceId       String?
+  invoice         Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNumber String        @unique
+  status        InvoiceStatus @default(DRAFT)
+  issueDate     DateTime      @default(now())
+  dueDate       DateTime?
+  subtotal      Float         @default(0)
+  tax           Float         @default(0)
+  total         Float         @default(0)
+  notes         String?
+  contactId     String?
+  contact       Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  matterId      String?
+  matter        Matter?       @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  lineItems   InvoiceLineItem[]
+  timeEntries TimeEntry[]
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+}
+
+model InvoiceLineItem {
+  id          String  @id @default(cuid())
+  description String
+  quantity    Float   @default(1)
+  rate        Float
+  amount      Float
+  invoiceId   String
+  invoice     Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  timeEntryId String?
+}
+
+enum DocumentType {
+  UPLOADED
+  WORD_PROCESSOR
+}
+
+model Document {
+  id           String       @id @default(cuid())
+  name         String
+  filePath     String?
+  mimeType     String?
+  sizeBytes    Int?
+  documentType DocumentType @default(UPLOADED)
+  content      Json?
+  matterId     String?
+  matter       Matter?      @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  uploadedAt   DateTime     @default(now())
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+}
