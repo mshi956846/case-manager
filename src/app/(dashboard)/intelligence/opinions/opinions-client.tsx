@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { BookOpen, Search, ExternalLink } from "lucide-react";
+import { BookOpen, Search, Check, ChevronsUpDown } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -15,11 +16,42 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { cn } from "@/lib/utils";
+import {
   APPELLATE_COURT_LABELS,
   APPELLATE_OUTCOME_LABELS,
   APPELLATE_OUTCOME_COLORS,
   OFFENSE_CATEGORY_LABELS,
 } from "@/lib/intelligence-constants";
+
+const INDIANA_COUNTIES = [
+  "Adams", "Allen", "Bartholomew", "Benton", "Blackford", "Boone", "Brown",
+  "Carroll", "Cass", "Clark", "Clay", "Clinton", "Crawford", "Daviess",
+  "Dearborn", "Decatur", "DeKalb", "Delaware", "Dubois", "Elkhart",
+  "Fayette", "Floyd", "Fountain", "Franklin", "Fulton", "Gibson", "Grant",
+  "Greene", "Hamilton", "Hancock", "Harrison", "Hendricks", "Henry", "Howard",
+  "Huntington", "Jackson", "Jasper", "Jay", "Jefferson", "Jennings", "Johnson",
+  "Knox", "Kosciusko", "LaGrange", "Lake", "LaPorte", "Lawrence", "Madison",
+  "Marion", "Marshall", "Martin", "Miami", "Monroe", "Montgomery", "Morgan",
+  "Newton", "Noble", "Ohio", "Orange", "Owen", "Parke", "Perry", "Pike",
+  "Porter", "Posey", "Pulaski", "Putnam", "Randolph", "Ripley", "Rush",
+  "St. Joseph", "Scott", "Shelby", "Spencer", "Starke", "Steuben", "Sullivan",
+  "Switzerland", "Tippecanoe", "Tipton", "Union", "Vanderburgh", "Vermillion",
+  "Vigo", "Wabash", "Warren", "Warrick", "Washington", "Wayne", "Wells",
+  "White", "Whitley",
+];
 
 interface Opinion {
   id: string;
@@ -53,6 +85,7 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
   const [outcomeFilter, setOutcomeFilter] = useState<string>("all");
   const [countyFilter, setCountyFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
+  const [countyOpen, setCountyOpen] = useState(false);
 
   const filtered = data.opinions.filter((o) => {
     if (
@@ -64,7 +97,7 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
       return false;
     if (courtFilter !== "all" && o.court !== courtFilter) return false;
     if (outcomeFilter !== "all" && o.outcome !== outcomeFilter) return false;
-    if (countyFilter !== "all" && o.county !== countyFilter) return false;
+    if (countyFilter !== "all" && o.county?.toLowerCase() !== countyFilter.toLowerCase()) return false;
     if (categoryFilter !== "all" && o.offenseCategory !== categoryFilter)
       return false;
     return true;
@@ -163,19 +196,64 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
             ))}
           </SelectContent>
         </Select>
-        <Select value={countyFilter} onValueChange={setCountyFilter}>
-          <SelectTrigger className="w-[160px]">
-            <SelectValue placeholder="County" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Counties</SelectItem>
-            {data.counties.map((c) => (
-              <SelectItem key={c} value={c}>
-                {c}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Popover open={countyOpen} onOpenChange={setCountyOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              role="combobox"
+              aria-expanded={countyOpen}
+              className="w-[200px] justify-between font-normal"
+            >
+              {countyFilter === "all"
+                ? "All Counties"
+                : `${countyFilter} County`}
+              <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-[200px] p-0">
+            <Command>
+              <CommandInput placeholder="Search county..." />
+              <CommandList>
+                <CommandEmpty>No county found.</CommandEmpty>
+                <CommandGroup>
+                  <CommandItem
+                    value="all"
+                    onSelect={() => {
+                      setCountyFilter("all");
+                      setCountyOpen(false);
+                    }}
+                  >
+                    <Check
+                      className={cn(
+                        "mr-2 h-4 w-4",
+                        countyFilter === "all" ? "opacity-100" : "opacity-0"
+                      )}
+                    />
+                    All Counties
+                  </CommandItem>
+                  {INDIANA_COUNTIES.map((county) => (
+                    <CommandItem
+                      key={county}
+                      value={county}
+                      onSelect={() => {
+                        setCountyFilter(county);
+                        setCountyOpen(false);
+                      }}
+                    >
+                      <Check
+                        className={cn(
+                          "mr-2 h-4 w-4",
+                          countyFilter === county ? "opacity-100" : "opacity-0"
+                        )}
+                      />
+                      {county}
+                    </CommandItem>
+                  ))}
+                </CommandGroup>
+              </CommandList>
+            </Command>
+          </PopoverContent>
+        </Popover>
         <Select value={categoryFilter} onValueChange={setCategoryFilter}>
           <SelectTrigger className="w-[180px]">
             <SelectValue placeholder="Offense" />
