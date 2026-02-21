@@ -1,7 +1,7 @@
-import * as dotenv from "dotenv";
 import * as path from "path";
 
-dotenv.config({ path: path.resolve(__dirname, "../../.env") });
+// eslint-disable-next-line @typescript-eslint/no-require-imports
+require("dotenv").config({ path: path.resolve(process.cwd(), ".env"), override: true });
 
 export const COURTLISTENER_API_BASE = "https://www.courtlistener.com/api/rest/v4";
 export const COURTLISTENER_TOKEN = process.env.COURTLISTENER_TOKEN || "";

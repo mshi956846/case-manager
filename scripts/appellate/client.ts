@@ -9,7 +9,7 @@ function sleep(ms: number): Promise<void> {
 }
 
 interface SearchParams {
-  court?: string;
+  courts?: string[];
   q?: string;
   filed_after?: string;
   filed_before?: string;
@@ -18,7 +18,7 @@ interface SearchParams {
 }
 
 export interface CourtListenerResult {
-  id: number;
+  cluster_id: number;
   caseName: string;
   docketNumber: string;
   dateFiled: string;
@@ -31,7 +31,7 @@ export interface CourtListenerResult {
     download_url: string | null;
     snippet: string;
   }[];
-  citation_count?: number;
+  citeCount?: number;
 }
 
 interface SearchResponse {
@@ -47,11 +47,11 @@ async function fetchWithRetry(
   backoff = 2000
 ): Promise<Response> {
   for (let attempt = 0; attempt <= retries; attempt++) {
-    const response = await fetch(url, {
-      headers: {
-        Authorization: `Token ${COURTLISTENER_TOKEN}`,
-      },
-    });
+    const headers: Record<string, string> = {};
+    if (COURTLISTENER_TOKEN && COURTLISTENER_TOKEN !== "your_token_here") {
+      headers.Authorization = `Token ${COURTLISTENER_TOKEN}`;
+    }
+    const response = await fetch(url, { headers });
 
     if (response.ok) return response;
 
@@ -77,16 +77,14 @@ async function fetchWithRetry(
 export async function searchOpinions(
   params: SearchParams
 ): Promise<SearchResponse> {
-  if (!COURTLISTENER_TOKEN || COURTLISTENER_TOKEN === "your_token_here") {
-    throw new Error(
-      "COURTLISTENER_TOKEN not set. Get a free token at https://www.courtlistener.com/sign-in/"
-    );
-  }
-
   const url = new URL(`${COURTLISTENER_API_BASE}/search/`);
   url.searchParams.set("type", "o");
 
-  if (params.court) url.searchParams.set("court", params.court);
+  if (params.courts) {
+    for (const court of params.courts) {
+      url.searchParams.append("court", court);
+    }
+  }
   if (params.q) url.searchParams.set("q", params.q);
   if (params.filed_after)
     url.searchParams.set("filed_after", params.filed_after);

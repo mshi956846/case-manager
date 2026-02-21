@@ -43,10 +43,10 @@ function buildOpinionData(result: CourtListenerResult) {
   const fullText = `${result.caseName} ${snippet}`;
 
   return {
-    courtListenerId: result.id,
+    courtListenerId: result.cluster_id,
     court: COURT_ID_MAP[result.court_id] || ("COURT_OF_APPEALS" as const),
     caseName: result.caseName || "Unknown",
-    docketNumber: result.docketNumber || `CL-${result.id}`,
+    docketNumber: result.docketNumber || `CL-${result.cluster_id}`,
     dateFiled: new Date(result.dateFiled),
     authors: result.judge || "",
     panel: result.judge || "",
@@ -56,7 +56,7 @@ function buildOpinionData(result: CourtListenerResult) {
     sourceUrl: `https://www.courtlistener.com${result.absolute_url}`,
     county: parseCounty(result.caseName, snippet),
     offenseCategory: parseOffenseCategory(result.caseName, snippet) as any,
-    citeCount: result.citation_count || 0,
+    citeCount: result.citeCount || 0,
   };
 }
 
@@ -107,7 +107,7 @@ async function upsertOpinion(result: CourtListenerResult): Promise<boolean> {
 
 export async function sync(): Promise<void> {
   const state = loadSyncState();
-  const courtParam = `${COURTS.SUPREME_COURT},${COURTS.COURT_OF_APPEALS}`;
+  const courtParam = [COURTS.SUPREME_COURT, COURTS.COURT_OF_APPEALS];
 
   // Default: look back 30 days if no prior sync
   const filedAfter =
@@ -118,7 +118,7 @@ export async function sync(): Promise<void> {
 
   const results = await fetchAllPages(
     {
-      court: courtParam,
+      courts: courtParam,
       filed_after: filedAfter,
       order_by: "dateFiled desc",
     },
@@ -151,7 +151,7 @@ export async function backfill(): Promise<void> {
     return;
   }
 
-  const courtParam = `${COURTS.SUPREME_COURT},${COURTS.COURT_OF_APPEALS}`;
+  const courtParam = [COURTS.SUPREME_COURT, COURTS.COURT_OF_APPEALS];
 
   console.log("Starting backfill of criminal appellate opinions...");
   console.log("This may take a while with rate limiting. Press Ctrl+C to stop (progress is saved).\n");
@@ -164,7 +164,7 @@ export async function backfill(): Promise<void> {
     try {
       console.log(`  Page ${page + 1}...`);
       const response = await searchOpinions({
-        court: courtParam,
+        courts: courtParam,
         order_by: "dateFiled desc",
         cursor,
       });
