@@ -598,8 +598,8 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
               return (
                 <div
                   key={result.clusterId}
-                  className={result.id ? "cursor-pointer" : undefined}
-                  onClick={result.id ? () => router.push(`/intelligence/opinions/${result.id}`) : undefined}
+                  className="cursor-pointer"
+                  onClick={() => router.push(`/intelligence/opinions/cl/${result.clusterId}`)}
                 >
                   {content}
                 </div>
