@@ -217,31 +217,33 @@ export default async function CLOpinionDetailPage({
             pdfUrl={pdfUrl}
           />
 
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-base">Sample Motion Practice</CardTitle>
-            </CardHeader>
-            <CardContent className="flex flex-wrap gap-3">
-              <a href="/docs/sample-motions/motion-to-suppress.pdf" download>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Motion to Suppress
-                </Button>
-              </a>
-              <a href="/docs/sample-motions/states-response.pdf" download>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  State&apos;s Response
-                </Button>
-              </a>
-              <a href="/docs/sample-motions/ruling.pdf" download>
-                <Button variant="outline" size="sm" className="gap-2">
-                  <Download className="h-4 w-4" />
-                  Ruling
-                </Button>
-              </a>
-            </CardContent>
-          </Card>
+          {clusterId === "10794478" && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-base">Motion Practice</CardTitle>
+              </CardHeader>
+              <CardContent className="flex flex-wrap gap-3">
+                <a href="/docs/sample-motions/motion-to-suppress.pdf" download>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Motion to Suppress
+                  </Button>
+                </a>
+                <a href="/docs/sample-motions/states-response.pdf" download>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    State&apos;s Response
+                  </Button>
+                </a>
+                <a href="/docs/sample-motions/ruling.pdf" download>
+                  <Button variant="outline" size="sm" className="gap-2">
+                    <Download className="h-4 w-4" />
+                    Ruling
+                  </Button>
+                </a>
+              </CardContent>
+            </Card>
+          )}
 
         </div>
 
