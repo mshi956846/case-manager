@@ -32,7 +32,7 @@ const navItems = [
   { href: "/invoices", label: "Invoices", icon: FileText },
   { href: "/accounting", label: "Accounting", icon: DollarSign },
   { href: "/contacts", label: "Contacts", icon: Users },
-  { href: "/intelligence", label: "Precedent", icon: Scale },
+  { href: "/intelligence/opinions", label: "Precedent", icon: Scale },
 ];
 
 export function AppSidebar() {
