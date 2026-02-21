@@ -4,6 +4,30 @@ import { prisma } from "@/lib/prisma";
 const COURTLISTENER_API = "https://www.courtlistener.com/api/rest/v4/search/";
 const COURTLISTENER_TOKEN = process.env.COURTLISTENER_TOKEN;
 
+function sanitizeInput(input: string): string {
+  return input.replace(/["\\\\/]/g, "").trim();
+}
+
+function buildAgencyQuery(agencyType: string, agencyName?: string): string {
+  const name = agencyName ? sanitizeInput(agencyName) : "";
+  switch (agencyType) {
+    case "city_pd":
+      return `("${name} Police" OR "${name} Police Department")`;
+    case "sheriff":
+      return `("${name} County Sheriff" OR "${name} County Sheriff's")`;
+    case "state_police":
+      return `("Indiana State Police" OR "State Police")`;
+    case "town_marshal":
+      return `("${name}" AND ("town marshal" OR "marshal"))`;
+    case "excise_police":
+      return `("excise police" OR "alcohol and tobacco commission")`;
+    case "conservation":
+      return `("conservation officer" OR "DNR officer" OR "Department of Natural Resources")`;
+    default:
+      return "";
+  }
+}
+
 // Search queries targeting police error reversals
 const POLICE_ERROR_QUERIES = [
   '"Fourth Amendment" suppress',
@@ -61,14 +85,34 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const qi = searchParams.get("qi") || "0";
   const county = searchParams.get("county");
+  const agencyType = searchParams.get("agencyType");
+  const agencyName = searchParams.get("agencyName") || undefined;
+
+  // Build agency query fragment if specified
+  const agencyFragment = agencyType ? buildAgencyQuery(agencyType, agencyName) : "";
 
   try {
     let criminal: CLResult[];
     let totalCount: number;
     let activeQuery: string;
 
-    if (qi === "all") {
-      // Fetch all queries in parallel and deduplicate
+    if (agencyFragment && qi === "all") {
+      // Agency + All Topics: just search the agency fragment alone (1 API call)
+      const data = await searchCourtListener(agencyFragment);
+      totalCount = data.count;
+      criminal = data.results.filter((r) => /\bCR\b/i.test(r.docketNumber));
+      activeQuery = "All Topics";
+    } else if (agencyFragment) {
+      // Agency + specific topic: combine them
+      const queryIndex = parseInt(qi, 10);
+      const topicQuery = POLICE_ERROR_QUERIES[queryIndex] || POLICE_ERROR_QUERIES[0];
+      const combinedQuery = `${agencyFragment} AND (${topicQuery})`;
+      const data = await searchCourtListener(combinedQuery);
+      totalCount = data.count;
+      criminal = data.results.filter((r) => /\bCR\b/i.test(r.docketNumber));
+      activeQuery = topicQuery;
+    } else if (qi === "all") {
+      // No agency, all topics: existing behavior
       const allData = await Promise.all(
         POLICE_ERROR_QUERIES.map((q) => searchCourtListener(q))
       );
@@ -88,6 +132,7 @@ export async function GET(req: NextRequest) {
       criminal.sort((a, b) => new Date(b.dateFiled).getTime() - new Date(a.dateFiled).getTime());
       activeQuery = "All Topics";
     } else {
+      // No agency, specific topic: existing behavior
       const queryIndex = parseInt(qi, 10);
       activeQuery = POLICE_ERROR_QUERIES[queryIndex] || POLICE_ERROR_QUERIES[0];
       const data = await searchCourtListener(activeQuery);

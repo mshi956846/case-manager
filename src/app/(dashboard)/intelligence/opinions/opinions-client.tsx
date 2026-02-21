@@ -37,6 +37,15 @@ import {
   OFFENSE_CATEGORY_LABELS,
 } from "@/lib/intelligence-constants";
 
+const AGENCY_TYPES = [
+  { value: "city_pd", label: "City Police Department", needsInput: "city" as const },
+  { value: "sheriff", label: "Sheriff's Department", needsInput: "county" as const },
+  { value: "state_police", label: "Indiana State Police", needsInput: null },
+  { value: "town_marshal", label: "Town Marshal", needsInput: "city" as const },
+  { value: "excise_police", label: "Excise Police", needsInput: null },
+  { value: "conservation", label: "Conservation Officer", needsInput: null },
+];
+
 const INDIANA_COUNTIES = [
   "Adams", "Allen", "Bartholomew", "Benton", "Blackford", "Boone", "Brown",
   "Carroll", "Cass", "Clark", "Clay", "Clinton", "Crawford", "Daviess",
@@ -115,11 +124,25 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
   const [policeErrorQueries, setPoliceErrorQueries] = useState<string[]>([]);
   const [policeErrorQueryIndex, setPoliceErrorQueryIndex] = useState("all");
 
-  const fetchPoliceErrors = useCallback(async (qi = "all") => {
+  // Agency filter state
+  const [agencyType, setAgencyType] = useState("any");
+  const [agencyCity, setAgencyCity] = useState("");
+  const [agencyCounty, setAgencyCounty] = useState("");
+  const [agencyCountyOpen, setAgencyCountyOpen] = useState(false);
+
+  const fetchPoliceErrors = useCallback(async (qi = "all", overrideAgencyType?: string, overrideAgencyName?: string) => {
     setPoliceErrorLoading(true);
     try {
       const params = new URLSearchParams({ qi });
       if (countyFilter !== "all") params.set("county", countyFilter);
+
+      const aType = overrideAgencyType ?? agencyType;
+      if (aType && aType !== "any") {
+        params.set("agencyType", aType);
+        const agencyConfig = AGENCY_TYPES.find((a) => a.value === aType);
+        const name = overrideAgencyName ?? (agencyConfig?.needsInput === "city" ? agencyCity : agencyConfig?.needsInput === "county" ? agencyCounty : "");
+        if (name) params.set("agencyName", name);
+      }
 
       const res = await fetch(`/api/intelligence/opinions/police-errors?${params}`);
       const json = await res.json();
@@ -132,13 +155,16 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
     } finally {
       setPoliceErrorLoading(false);
     }
-  }, [countyFilter]);
+  }, [countyFilter, agencyType, agencyCity, agencyCounty]);
 
   const togglePoliceErrorMode = useCallback(() => {
     if (policeErrorMode) {
       setPoliceErrorMode(false);
       setPoliceErrorResults([]);
       setPoliceErrorTotal(0);
+      setAgencyType("any");
+      setAgencyCity("");
+      setAgencyCounty("");
     } else {
       setPoliceErrorMode(true);
       fetchPoliceErrors("all");
@@ -379,6 +405,104 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
             <span className="text-sm text-muted-foreground ml-2">
               {policeErrorTotal.toLocaleString()} opinions match across all Indiana appellate cases
             </span>
+          </div>
+          <div className="flex flex-wrap items-end gap-2">
+            <div>
+              <span className="text-sm font-medium text-muted-foreground">Agency filter:</span>
+              <Select
+                value={agencyType}
+                onValueChange={(v) => {
+                  setAgencyType(v);
+                  setAgencyCity("");
+                  setAgencyCounty("");
+                }}
+              >
+                <SelectTrigger className="w-[240px] mt-1">
+                  <SelectValue placeholder="Select agency type..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any Agency</SelectItem>
+                  {AGENCY_TYPES.map((a) => (
+                    <SelectItem key={a.value} value={a.value}>
+                      {a.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            {agencyType !== "any" && AGENCY_TYPES.find((a) => a.value === agencyType)?.needsInput === "city" && (
+              <div>
+                <Input
+                  placeholder="City name (e.g. Fishers)"
+                  value={agencyCity}
+                  onChange={(e) => setAgencyCity(e.target.value)}
+                  className="w-[220px]"
+                />
+              </div>
+            )}
+            {agencyType === "sheriff" && (
+              <div>
+                <Popover open={agencyCountyOpen} onOpenChange={setAgencyCountyOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={agencyCountyOpen}
+                      className="w-[220px] justify-between font-normal"
+                    >
+                      {agencyCounty || "Select county..."}
+                      <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-[220px] p-0">
+                    <Command>
+                      <CommandInput placeholder="Search county..." />
+                      <CommandList>
+                        <CommandEmpty>No county found.</CommandEmpty>
+                        <CommandGroup>
+                          {INDIANA_COUNTIES.map((c) => (
+                            <CommandItem
+                              key={c}
+                              value={c}
+                              onSelect={() => {
+                                setAgencyCounty(c);
+                                setAgencyCountyOpen(false);
+                              }}
+                            >
+                              <Check
+                                className={cn(
+                                  "mr-2 h-4 w-4",
+                                  agencyCounty === c ? "opacity-100" : "opacity-0"
+                                )}
+                              />
+                              {c}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
+              </div>
+            )}
+            {agencyType !== "any" && (
+              <Button
+                onClick={() => fetchPoliceErrors(policeErrorQueryIndex)}
+                disabled={
+                  policeErrorLoading ||
+                  (AGENCY_TYPES.find((a) => a.value === agencyType)?.needsInput === "city" && !agencyCity.trim()) ||
+                  (agencyType === "sheriff" && !agencyCounty)
+                }
+                className="bg-red-600 hover:bg-red-700 text-white"
+              >
+                {policeErrorLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : (
+                  <Search className="h-4 w-4 mr-2" />
+                )}
+                Search Agency
+              </Button>
+            )}
           </div>
         </div>
       )}
