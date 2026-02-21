@@ -59,19 +59,43 @@ async function searchCourtListener(query: string, page = 1): Promise<{
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const queryIndex = parseInt(searchParams.get("qi") || "0", 10);
+  const qi = searchParams.get("qi") || "0";
   const county = searchParams.get("county");
 
-  // Use a specific query or combine top queries
-  const query = POLICE_ERROR_QUERIES[queryIndex] || POLICE_ERROR_QUERIES[0];
-
   try {
-    const data = await searchCourtListener(query);
+    let criminal: CLResult[];
+    let totalCount: number;
+    let activeQuery: string;
 
-    // Filter to criminal dockets only
-    const criminal = data.results.filter((r) =>
-      /\bCR\b/i.test(r.docketNumber)
-    );
+    if (qi === "all") {
+      // Fetch all queries in parallel and deduplicate
+      const allData = await Promise.all(
+        POLICE_ERROR_QUERIES.map((q) => searchCourtListener(q))
+      );
+      const seen = new Set<number>();
+      criminal = [];
+      totalCount = 0;
+      for (const data of allData) {
+        totalCount += data.count;
+        for (const r of data.results) {
+          if (/\bCR\b/i.test(r.docketNumber) && !seen.has(r.cluster_id)) {
+            seen.add(r.cluster_id);
+            criminal.push(r);
+          }
+        }
+      }
+      // Sort combined results by date descending
+      criminal.sort((a, b) => new Date(b.dateFiled).getTime() - new Date(a.dateFiled).getTime());
+      activeQuery = "All Topics";
+    } else {
+      const queryIndex = parseInt(qi, 10);
+      activeQuery = POLICE_ERROR_QUERIES[queryIndex] || POLICE_ERROR_QUERIES[0];
+      const data = await searchCourtListener(activeQuery);
+      totalCount = data.count;
+      criminal = data.results.filter((r) =>
+        /\bCR\b/i.test(r.docketNumber)
+      );
+    }
 
     // Cross-reference with our DB for local data (outcome, etc.)
     const docketNumbers = criminal.map((r) => r.docketNumber);
@@ -116,8 +140,8 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       results,
-      total: data.count,
-      query,
+      total: totalCount,
+      query: activeQuery,
       queries: POLICE_ERROR_QUERIES,
     });
   } catch (err: any) {

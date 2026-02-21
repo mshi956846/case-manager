@@ -113,12 +113,12 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
   const [policeErrorTotal, setPoliceErrorTotal] = useState(0);
   const [policeErrorLoading, setPoliceErrorLoading] = useState(false);
   const [policeErrorQueries, setPoliceErrorQueries] = useState<string[]>([]);
-  const [policeErrorQueryIndex, setPoliceErrorQueryIndex] = useState(0);
+  const [policeErrorQueryIndex, setPoliceErrorQueryIndex] = useState("all");
 
-  const fetchPoliceErrors = useCallback(async (qi = 0) => {
+  const fetchPoliceErrors = useCallback(async (qi = "all") => {
     setPoliceErrorLoading(true);
     try {
-      const params = new URLSearchParams({ qi: String(qi) });
+      const params = new URLSearchParams({ qi });
       if (countyFilter !== "all") params.set("county", countyFilter);
 
       const res = await fetch(`/api/intelligence/opinions/police-errors?${params}`);
@@ -126,7 +126,7 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
       setPoliceErrorResults(json.results || []);
       setPoliceErrorTotal(json.total || 0);
       setPoliceErrorQueries(json.queries || []);
-      setPoliceErrorQueryIndex(qi);
+      setPoliceErrorQueryIndex(String(qi));
     } catch (err) {
       console.error("Failed to fetch police error reversals:", err);
     } finally {
@@ -141,7 +141,7 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
       setPoliceErrorTotal(0);
     } else {
       setPoliceErrorMode(true);
-      fetchPoliceErrors(0);
+      fetchPoliceErrors("all");
     }
   }, [policeErrorMode, fetchPoliceErrors]);
 
@@ -361,13 +361,14 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
           <div className="flex flex-wrap items-center gap-2">
             <span className="text-sm font-medium text-muted-foreground">Search topic:</span>
             <Select
-              value={String(policeErrorQueryIndex)}
-              onValueChange={(v) => fetchPoliceErrors(parseInt(v, 10))}
+              value={policeErrorQueryIndex}
+              onValueChange={(v) => fetchPoliceErrors(v)}
             >
               <SelectTrigger className="w-[320px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="all">All Topics</SelectItem>
                 {policeErrorQueries.map((q, i) => (
                   <SelectItem key={i} value={String(i)}>
                     {q}
