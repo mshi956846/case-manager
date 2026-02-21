@@ -187,7 +187,44 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
     return true;
   });
 
+  const JUDGE_FULL_NAMES: Record<string, string> = {
+    "Riley": "Judge Patricia A. Riley",
+    "Najam": "Judge Edward W. Najam, Jr.",
+    "Baker": "Senior Judge John G. Baker",
+    "Bailey": "Judge L. Mark Bailey",
+    "Bradford": "Judge Cale J. Bradford",
+    "Altice": "Judge Robert R. Altice, Jr.",
+    "Vaidik": "Judge Nancy H. Vaidik",
+    "DeBoer": "Judge Mary A. DeBoer",
+    "Pyle": "Judge Rudolph R. Pyle III",
+    "Pyle III": "Judge Rudolph R. Pyle III",
+    "May": "Judge Melissa S. May",
+    "Mathias": "Judge Paul D. Mathias",
+    "Crone": "Judge Terry A. Crone",
+    "Crone SR": "Senior Judge Terry A. Crone",
+    "Brown": "Judge Elaine B. Brown",
+    "Tavitas": "Judge Elizabeth F. Tavitas",
+    "Weissmann": "Judge Leanna K. Weissmann",
+    "Scheele": "Judge Stephen E. Scheele",
+    "Felix": "Judge Paul A. Felix",
+    "Foley": "Judge Peter R. Foley",
+    "Kenworthy": "Judge Dana J. Kenworthy",
+    "Robb": "Senior Judge Margret G. Robb",
+    "Robb SR": "Senior Judge Margret G. Robb",
+    "Kirsch": "Judge James S. Kirsch",
+    "Barnes": "Judge John G. Barnes",
+    "Barteau": "Judge Betty Barteau",
+    "Friedlander": "Judge Michael P. Friedlander",
+    "Sharpnack": "Judge John T. Sharpnack",
+    "Shepard": "Senior Judge Randall T. Shepard",
+    "Darden": "Judge Carr L. Darden, Jr.",
+    "Baker SR": "Senior Judge John G. Baker",
+  };
+
   const topAuthor = data.topAuthors[0];
+  const topAuthorFullName = topAuthor
+    ? JUDGE_FULL_NAMES[topAuthor.name] || topAuthor.name
+    : null;
 
   return (
     <div className="space-y-6">
@@ -236,7 +273,7 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
           </CardHeader>
           <CardContent>
             <div className="text-lg font-bold text-indigo-700 truncate">
-              {topAuthor ? topAuthor.name : "—"}
+              {topAuthorFullName || "—"}
             </div>
             {topAuthor && (
               <div className="text-xs text-muted-foreground">
