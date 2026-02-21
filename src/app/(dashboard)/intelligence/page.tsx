@@ -43,7 +43,7 @@ export default async function IntelligencePage() {
         <div>
           <h1 className="text-2xl font-bold">Indiana Criminal Appellate Opinions</h1>
           <p className="text-sm text-muted-foreground">
-            Indiana court analytics & judicial intelligence
+            Browse and search Indiana criminal appellate opinions
           </p>
         </div>
       </div>
