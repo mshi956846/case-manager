@@ -17,6 +17,7 @@ import {
   DollarSign,
   LogOut,
   Scale,
+  Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -28,6 +29,7 @@ const navItems = [
   { href: "/calendar", label: "Calendar", icon: Calendar },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
   { href: "/documents", label: "Documents", icon: FileEdit },
+  { href: "/e-filing", label: "E-Filing", icon: Send },
   { href: "/time-tracking", label: "Time Tracking", icon: Clock },
   { href: "/invoices", label: "Invoices", icon: FileText },
   { href: "/accounting", label: "Accounting", icon: DollarSign },

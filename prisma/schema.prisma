@@ -62,6 +62,7 @@ model Matter {
   invoices     Invoice[]
   events       CalendarEvent[]
   transactions Transaction[]
+  filings      Filing[]
 }
 
 enum MatterStatus {
@@ -307,6 +308,103 @@ model Document {
   uploadedAt   DateTime     @default(now())
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+
+  filingDocuments FilingDocument[]
+}
+
+// ─── E-Filing ─────────────────────────────────────────────
+
+enum FilingStatus {
+  DRAFT
+  READY
+  SUBMITTED
+  ACCEPTED
+  REJECTED
+  RETURNED
+}
+
+enum FilingType {
+  INITIAL
+  SUBSEQUENT
+  SERVICE_ONLY
+}
+
+enum ServiceMethod {
+  E_SERVICE
+  MAIL
+  PERSONAL
+  PUBLICATION
+}
+
+enum ServiceStatus {
+  PENDING
+  SERVED
+  FAILED
+}
+
+enum FilingDocumentRole {
+  LEAD
+  ATTACHMENT
+  PROPOSED_ORDER
+}
+
+model Filing {
+  id           String       @id @default(cuid())
+  status       FilingStatus @default(DRAFT)
+  filingType   FilingType   @default(SUBSEQUENT)
+  county       String
+  court        String
+  division     String?
+  judge        String?
+  causeNumber  String?
+  filingParty  String
+  envelopeNumber String?
+  filingCode   String?
+  feeAmount    Float        @default(0)
+  feeWaived    Boolean      @default(false)
+  notes        String?
+  submittedAt  DateTime?
+  acceptedAt   DateTime?
+  rejectedAt   DateTime?
+  rejectionReason String?
+  returnReason    String?
+  matterId     String?
+  matter       Matter?      @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  documents    FilingDocument[]
+  serviceRecords ServiceRecord[]
+}
+
+model FilingDocument {
+  id         String             @id @default(cuid())
+  role       FilingDocumentRole @default(LEAD)
+  filingCode String?
+  sortOrder  Int                @default(0)
+  filingId   String
+  filing     Filing             @relation(fields: [filingId], references: [id], onDelete: Cascade)
+  documentId String
+  document   Document           @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime           @default(now())
+  updatedAt  DateTime           @updatedAt
+
+  @@unique([filingId, documentId])
+}
+
+model ServiceRecord {
+  id           String        @id @default(cuid())
+  method       ServiceMethod @default(E_SERVICE)
+  status       ServiceStatus @default(PENDING)
+  partyName    String
+  partyEmail   String?
+  partyAddress String?
+  partyRole    String?
+  serviceDate  DateTime?
+  filingId     String
+  filing       Filing        @relation(fields: [filingId], references: [id], onDelete: Cascade)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
 }
 
 // ─── Court Intelligence ─────────────────────────────────────

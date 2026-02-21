@@ -17,7 +17,7 @@ import { TableHeader } from "@tiptap/extension-table-header";
 import { DateNode } from "@/lib/tiptap-extensions/date-node";
 import { DropdownField } from "@/lib/tiptap-extensions/dropdown-field";
 import { toast } from "sonner";
-import { ArrowLeft, Save, FileDown, Gavel } from "lucide-react";
+import { ArrowLeft, Save, FileDown, Gavel, Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -207,6 +207,23 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
           )}
         </div>
         <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={async () => {
+              if (editor) {
+                await saveContent(editor.getJSON());
+              }
+              const params = new URLSearchParams();
+              params.set("documentId", initialDoc.id);
+              if (initialDoc.matter?.id) params.set("matterId", initialDoc.matter.id);
+              router.push(`/e-filing/new?${params.toString()}`);
+            }}
+            title="Prepare this document for e-filing"
+          >
+            <Send className="mr-2 h-4 w-4" />
+            Prepare for Filing
+          </Button>
           <Button
             variant={courtMode ? "default" : "outline"}
             size="sm"
