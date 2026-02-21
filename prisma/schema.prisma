@@ -29,8 +29,9 @@ model Contact {
   createdAt DateTime    @default(now())
   updatedAt DateTime    @updatedAt
 
-  matters  MatterContact[]
-  invoices Invoice[]
+  matters      MatterContact[]
+  invoices     Invoice[]
+  transactions Transaction[]
 }
 
 enum ContactType {
@@ -54,12 +55,13 @@ model Matter {
   createdAt            DateTime     @default(now())
   updatedAt            DateTime     @updatedAt
 
-  contacts    MatterContact[]
-  tasks       Task[]
-  timeEntries TimeEntry[]
-  documents   Document[]
-  invoices    Invoice[]
-  events      CalendarEvent[]
+  contacts     MatterContact[]
+  tasks        Task[]
+  timeEntries  TimeEntry[]
+  documents    Document[]
+  invoices     Invoice[]
+  events       CalendarEvent[]
+  transactions Transaction[]
 }
 
 enum MatterStatus {
@@ -162,13 +164,26 @@ model Invoice {
   notes         String?
   contactId     String?
   contact       Contact?      @relation(fields: [contactId], references: [id], onDelete: SetNull)
-  matterId      String?
-  matter        Matter?       @relation(fields: [matterId], references: [id], onDelete: SetNull)
-  createdAt     DateTime      @default(now())
-  updatedAt     DateTime      @updatedAt
+  matterId             String?
+  matter               Matter?          @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  billingType          BillingType      @default(HOURLY)
+  offenseType          String?
+  flatFeeStructure     FlatFeeStructure?
+  flatFeeAmount        Float?
+  splitUpfrontPercent  Float?
+  splitRemainderEvent  SplitFeeEvent?
+  hourlyRateType       HourlyRateType?
+  hourlyRate           Float?
+  includesTrial        Boolean?
+  trialDays            Int?
+  trialFeeType         TrialFeeType?
+  trialFeeAmount       Float?
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
 
-  lineItems   InvoiceLineItem[]
-  timeEntries TimeEntry[]
+  lineItems    InvoiceLineItem[]
+  timeEntries  TimeEntry[]
+  transactions Transaction[]
 }
 
 enum InvoiceStatus {
@@ -176,6 +191,36 @@ enum InvoiceStatus {
   SENT
   PAID
   OVERDUE
+}
+
+enum BillingType {
+  HOURLY
+  FLAT_FEE
+}
+
+enum FlatFeeStructure {
+  FULL_UP_FRONT
+  SPLIT
+}
+
+enum SplitFeeEvent {
+  FIRST_PRE_TRIAL
+  FINAL_PRE_TRIAL
+  PLEA_HEARING
+  SENTENCING
+  MOTION_HEARING
+  BENCH_TRIAL
+  JURY_TRIAL
+}
+
+enum TrialFeeType {
+  DAILY_RATE
+  FLAT
+}
+
+enum HourlyRateType {
+  INVOICE_RATE
+  PER_ENTRY
 }
 
 model InvoiceLineItem {
@@ -194,6 +239,61 @@ enum DocumentType {
   WORD_PROCESSOR
 }
 
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  WIRE
+  MONEY_ORDER
+  IOLTA
+  OTHER
+}
+
+model AccountCategory {
+  id          String          @id @default(cuid())
+  name        String          @unique
+  code        String          @unique
+  type        TransactionType
+  description String?
+  taxLine     String?
+  isSystem    Boolean         @default(false)
+  sortOrder   Int             @default(0)
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+
+  transactions Transaction[]
+}
+
+model Transaction {
+  id              String          @id @default(cuid())
+  type            TransactionType
+  date            DateTime
+  amount          Float
+  description     String
+  payee           String?
+  referenceNumber String?
+  paymentMethod   PaymentMethod?
+  notes           String?
+  isReimbursable  Boolean         @default(false)
+  categoryId      String
+  category        AccountCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  matterId        String?
+  matter          Matter?         @relation(fields: [matterId], references: [id], onDelete: SetNull)
+  contactId       String?
+  contact         Contact?        @relation(fields: [contactId], references: [id], onDelete: SetNull)
+  invoiceId       String?
+  invoice         Invoice?        @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
 model Document {
   id           String       @id @default(cuid())
   name         String
@@ -207,4 +307,212 @@ model Document {
   uploadedAt   DateTime     @default(now())
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
+}
+
+// ─── Court Intelligence ─────────────────────────────────────
+
+enum CourtType {
+  SUPERIOR
+  CIRCUIT
+}
+
+enum MotionType {
+  SUPPRESS_EVIDENCE
+  SUPPRESS_STATEMENT
+  SUPPRESS_IDENTIFICATION
+  DISMISS
+  CHANGE_OF_VENUE
+  CONTINUANCE
+  BOND_REDUCTION
+  COMPEL_DISCOVERY
+  LIMINE
+  RECONSIDER
+  OTHER
+}
+
+enum MotionResult {
+  GRANTED
+  DENIED
+  PARTIALLY_GRANTED
+  WITHDRAWN
+  MOOT
+}
+
+enum OffenseLevel {
+  MURDER
+  LEVEL_1_FELONY
+  LEVEL_2_FELONY
+  LEVEL_3_FELONY
+  LEVEL_4_FELONY
+  LEVEL_5_FELONY
+  LEVEL_6_FELONY
+  CLASS_A_MISDEMEANOR
+  CLASS_B_MISDEMEANOR
+  CLASS_C_MISDEMEANOR
+  INFRACTION
+}
+
+enum OffenseCategory {
+  DRUG_DEALING
+  DRUG_POSSESSION
+  DUI_OWI
+  BATTERY
+  DOMESTIC_BATTERY
+  ASSAULT
+  ROBBERY
+  BURGLARY
+  THEFT
+  FRAUD
+  WEAPONS
+  SEX_OFFENSE
+  MURDER_HOMICIDE
+  ARSON
+  RESISTING
+  DRIVING_OFFENSE
+  OTHER
+}
+
+enum CaseDisposition {
+  PLEA_AGREEMENT
+  PLEA_OPEN
+  BENCH_TRIAL_CONVICTION
+  BENCH_TRIAL_ACQUITTAL
+  JURY_TRIAL_CONVICTION
+  JURY_TRIAL_ACQUITTAL
+  DISMISSED
+  DIVERTED
+  OTHER
+}
+
+model Judge {
+  id            String    @id @default(cuid())
+  name          String
+  county        String
+  courtType     CourtType
+  courtNumber   Int?
+  division      String?
+  appointedDate DateTime?
+  isActive      Boolean   @default(true)
+  notes         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  motionOutcomes    MotionOutcome[]
+  sentencingRecords SentencingRecord[]
+
+  @@unique([name, county])
+}
+
+model Prosecutor {
+  id        String   @id @default(cuid())
+  name      String
+  office    String
+  county    String
+  title     String?
+  isActive  Boolean  @default(true)
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  sentencingRecords      SentencingRecord[]
+  prosecutorCaseOutcomes ProsecutorCaseOutcome[]
+
+  @@unique([name, county])
+}
+
+model MotionOutcome {
+  id              String           @id @default(cuid())
+  motionType      MotionType
+  result          MotionResult
+  judgeId         String
+  judge           Judge            @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  offenseCategory OffenseCategory?
+  offenseLevel    OffenseLevel?
+  caseNumber      String?
+  filingDate      DateTime
+  rulingDate      DateTime?
+  notes           String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+}
+
+model SentencingRecord {
+  id                          String          @id @default(cuid())
+  judgeId                     String
+  judge                       Judge           @relation(fields: [judgeId], references: [id], onDelete: Cascade)
+  prosecutorId                String?
+  prosecutor                  Prosecutor?     @relation(fields: [prosecutorId], references: [id], onDelete: SetNull)
+  offenseCategory             OffenseCategory
+  offenseLevel                OffenseLevel
+  offenseDescription          String?
+  disposition                 CaseDisposition
+  sentenceMonthsPrison        Int?
+  sentenceMonthsSuspended     Int?
+  sentenceMonthsProbation     Int?
+  sentenceMonthsHomeDetention Int?
+  fineAmount                  Float?
+  communityServiceHours       Int?
+  isConsecutive               Boolean         @default(false)
+  restitutionAmount           Float?
+  sentenceDate                DateTime
+  caseNumber                  String?
+  notes                       String?
+  createdAt                   DateTime        @default(now())
+  updatedAt                   DateTime        @updatedAt
+}
+
+model ProsecutorCaseOutcome {
+  id              String          @id @default(cuid())
+  prosecutorId    String
+  prosecutor      Prosecutor      @relation(fields: [prosecutorId], references: [id], onDelete: Cascade)
+  offenseCategory OffenseCategory
+  offenseLevel    OffenseLevel
+  disposition     CaseDisposition
+  originalCharge  String?
+  finalCharge     String?
+  chargeReduced   Boolean         @default(false)
+  outcomeDate     DateTime
+  caseNumber      String?
+  notes           String?
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+}
+
+// ─── Appellate Opinions ─────────────────────────────────────
+
+enum AppellateCourt {
+  SUPREME_COURT
+  COURT_OF_APPEALS
+}
+
+enum AppellateOutcome {
+  AFFIRMED
+  REVERSED
+  REVERSED_AND_REMANDED
+  REMANDED
+  VACATED
+  DISMISSED
+  TRANSFER_DENIED
+  TRANSFER_GRANTED
+  OTHER
+}
+
+model AppellateOpinion {
+  id              String            @id @default(cuid())
+  courtListenerId Int               @unique
+  court           AppellateCourt
+  caseName        String
+  docketNumber    String            @unique
+  dateFiled       DateTime
+  authors         String
+  panel           String
+  outcome         AppellateOutcome  @default(OTHER)
+  summary         String?
+  pdfUrl          String?
+  sourceUrl       String
+  county          String?
+  offenseCategory OffenseCategory?
+  citeCount       Int               @default(0)
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
 }
