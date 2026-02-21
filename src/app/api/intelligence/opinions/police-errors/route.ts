@@ -1,0 +1,129 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/prisma";
+
+const COURTLISTENER_API = "https://www.courtlistener.com/api/rest/v4/search/";
+const COURTLISTENER_TOKEN = process.env.COURTLISTENER_TOKEN;
+
+// Search queries targeting police error reversals
+const POLICE_ERROR_QUERIES = [
+  '"Fourth Amendment" suppress',
+  '"search and seizure" reversed',
+  '"Miranda" suppress reversed',
+  '"probable cause" reversed',
+  '"unlawful stop" OR "illegal stop" reversed',
+  '"warrantless search" reversed',
+  '"consent to search" reversed',
+  '"excessive force" reversed',
+  '"motion to suppress" granted reversed',
+  '"Terry stop" reversed',
+  '"Fifth Amendment" suppress',
+  '"unreasonable search"',
+  '"fruit of the poisonous tree"',
+  '"exclusionary rule"',
+];
+
+interface CLResult {
+  cluster_id: number;
+  caseName: string;
+  docketNumber: string;
+  dateFiled: string;
+  court_id: string;
+  court: string;
+  judge: string;
+  absolute_url: string;
+  snippet: string;
+  citeCount: number;
+  opinions: { download_url: string | null; snippet: string }[];
+}
+
+async function searchCourtListener(query: string, page = 1): Promise<{
+  count: number;
+  results: CLResult[];
+}> {
+  const url = new URL(COURTLISTENER_API);
+  url.searchParams.set("type", "o");
+  url.searchParams.append("court", "ind");
+  url.searchParams.append("court", "indctapp");
+  url.searchParams.set("q", query);
+  url.searchParams.set("order_by", "dateFiled desc");
+
+  const headers: Record<string, string> = {};
+  if (COURTLISTENER_TOKEN && COURTLISTENER_TOKEN !== "your_token_here") {
+    headers.Authorization = `Token ${COURTLISTENER_TOKEN}`;
+  }
+
+  const res = await fetch(url.toString(), { headers, next: { revalidate: 3600 } });
+  if (!res.ok) throw new Error(`CourtListener error: ${res.status}`);
+  return res.json();
+}
+
+export async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const queryIndex = parseInt(searchParams.get("qi") || "0", 10);
+  const county = searchParams.get("county");
+
+  // Use a specific query or combine top queries
+  const query = POLICE_ERROR_QUERIES[queryIndex] || POLICE_ERROR_QUERIES[0];
+
+  try {
+    const data = await searchCourtListener(query);
+
+    // Filter to criminal dockets only
+    const criminal = data.results.filter((r) =>
+      /\bCR\b/i.test(r.docketNumber)
+    );
+
+    // Cross-reference with our DB for local data (outcome, etc.)
+    const docketNumbers = criminal.map((r) => r.docketNumber);
+    const localOpinions = await prisma.appellateOpinion.findMany({
+      where: { docketNumber: { in: docketNumbers } },
+      select: { docketNumber: true, outcome: true, county: true, offenseCategory: true, id: true },
+    });
+    const localMap = new Map(localOpinions.map((o) => [o.docketNumber, o]));
+
+    // Build enriched results
+    let results = criminal.map((r) => {
+      const local = localMap.get(r.docketNumber);
+      const opinionSnippet = r.opinions?.[0]?.snippet || "";
+      // Clean up snippet — strip excessive whitespace
+      const cleanSnippet = opinionSnippet.replace(/\s+/g, " ").trim();
+
+      return {
+        id: local?.id || null,
+        clusterId: r.cluster_id,
+        caseName: r.caseName,
+        docketNumber: r.docketNumber,
+        dateFiled: r.dateFiled,
+        court: r.court,
+        courtId: r.court_id,
+        judge: r.judge,
+        outcome: local?.outcome || null,
+        county: local?.county || null,
+        offenseCategory: local?.offenseCategory || null,
+        snippet: cleanSnippet,
+        pdfUrl: r.opinions?.[0]?.download_url || null,
+        sourceUrl: `https://www.courtlistener.com${r.absolute_url}`,
+        citeCount: r.citeCount || 0,
+      };
+    });
+
+    // Optionally filter by county
+    if (county) {
+      results = results.filter(
+        (r) => r.county?.toLowerCase() === county.toLowerCase()
+      );
+    }
+
+    return NextResponse.json({
+      results,
+      total: data.count,
+      query,
+      queries: POLICE_ERROR_QUERIES,
+    });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err.message, results: [], total: 0 },
+      { status: 502 }
+    );
+  }
+}

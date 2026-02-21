@@ -29,6 +29,7 @@ export async function GET(req: NextRequest) {
       { caseName: { contains: search, mode: "insensitive" } },
       { docketNumber: { contains: search, mode: "insensitive" } },
       { authors: { contains: search, mode: "insensitive" } },
+      { summary: { contains: search, mode: "insensitive" } },
     ];
   }
 

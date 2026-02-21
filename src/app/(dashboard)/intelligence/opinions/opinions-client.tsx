@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { BookOpen, Search, Check, ChevronsUpDown } from "lucide-react";
+import { BookOpen, Search, Check, ChevronsUpDown, ShieldAlert, X, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -70,6 +70,24 @@ interface Opinion {
   citeCount: number;
 }
 
+interface PoliceErrorResult {
+  id: string | null;
+  clusterId: number;
+  caseName: string;
+  docketNumber: string;
+  dateFiled: string;
+  court: string;
+  courtId: string;
+  judge: string;
+  outcome: string | null;
+  county: string | null;
+  offenseCategory: string | null;
+  snippet: string;
+  pdfUrl: string | null;
+  sourceUrl: string;
+  citeCount: number;
+}
+
 interface OpinionsData {
   opinions: Opinion[];
   total: number;
@@ -86,6 +104,44 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
   const [countyFilter, setCountyFilter] = useState<string>("all");
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [countyOpen, setCountyOpen] = useState(false);
+
+  // Police Error Reversals state
+  const [policeErrorMode, setPoliceErrorMode] = useState(false);
+  const [policeErrorResults, setPoliceErrorResults] = useState<PoliceErrorResult[]>([]);
+  const [policeErrorTotal, setPoliceErrorTotal] = useState(0);
+  const [policeErrorLoading, setPoliceErrorLoading] = useState(false);
+  const [policeErrorQueries, setPoliceErrorQueries] = useState<string[]>([]);
+  const [policeErrorQueryIndex, setPoliceErrorQueryIndex] = useState(0);
+
+  const fetchPoliceErrors = useCallback(async (qi = 0) => {
+    setPoliceErrorLoading(true);
+    try {
+      const params = new URLSearchParams({ qi: String(qi) });
+      if (countyFilter !== "all") params.set("county", countyFilter);
+
+      const res = await fetch(`/api/intelligence/opinions/police-errors?${params}`);
+      const json = await res.json();
+      setPoliceErrorResults(json.results || []);
+      setPoliceErrorTotal(json.total || 0);
+      setPoliceErrorQueries(json.queries || []);
+      setPoliceErrorQueryIndex(qi);
+    } catch (err) {
+      console.error("Failed to fetch police error reversals:", err);
+    } finally {
+      setPoliceErrorLoading(false);
+    }
+  }, [countyFilter]);
+
+  const togglePoliceErrorMode = useCallback(() => {
+    if (policeErrorMode) {
+      setPoliceErrorMode(false);
+      setPoliceErrorResults([]);
+      setPoliceErrorTotal(0);
+    } else {
+      setPoliceErrorMode(true);
+      fetchPoliceErrors(0);
+    }
+  }, [policeErrorMode, fetchPoliceErrors]);
 
   const filtered = data.opinions.filter((o) => {
     if (
@@ -162,6 +218,35 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
           </CardContent>
         </Card>
       </div>
+
+      <Button
+        variant={policeErrorMode ? "default" : "outline"}
+        className={cn(
+          "w-full justify-start gap-2 text-left",
+          policeErrorMode
+            ? "bg-red-600 hover:bg-red-700 text-white"
+            : "border-red-200 text-red-700 hover:bg-red-50 hover:border-red-300"
+        )}
+        onClick={togglePoliceErrorMode}
+      >
+        {policeErrorLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <ShieldAlert className="h-4 w-4" />
+        )}
+        <span className="font-semibold">Police Error Reversals</span>
+        <span className={cn("text-sm", policeErrorMode ? "text-red-100" : "text-red-400")}>
+          — Search cases reversed due to constitutional violations, unlawful searches, Miranda issues &amp; more
+        </span>
+        {policeErrorMode && (
+          <>
+            <Badge variant="secondary" className="ml-auto bg-white/20 text-white border-0">
+              {policeErrorTotal} found
+            </Badge>
+            <X className="h-4 w-4 ml-1" />
+          </>
+        )}
+      </Button>
 
       <div className="flex flex-wrap gap-3">
         <div className="relative flex-1 min-w-[200px]">
@@ -269,8 +354,130 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
         </Select>
       </div>
 
+      {policeErrorMode && (
+        <div className="space-y-3">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-sm font-medium text-muted-foreground">Search topic:</span>
+            <Select
+              value={String(policeErrorQueryIndex)}
+              onValueChange={(v) => fetchPoliceErrors(parseInt(v, 10))}
+            >
+              <SelectTrigger className="w-[320px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {policeErrorQueries.map((q, i) => (
+                  <SelectItem key={i} value={String(i)}>
+                    {q}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <span className="text-sm text-muted-foreground ml-2">
+              {policeErrorTotal.toLocaleString()} opinions match across all Indiana appellate cases
+            </span>
+          </div>
+        </div>
+      )}
+
       <div className="grid gap-3">
-        {filtered.length === 0 ? (
+        {policeErrorMode ? (
+          policeErrorLoading ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                <Loader2 className="h-5 w-5 animate-spin mx-auto mb-2" />
+                Searching CourtListener for police error reversals...
+              </CardContent>
+            </Card>
+          ) : policeErrorResults.length === 0 ? (
+            <Card>
+              <CardContent className="py-8 text-center text-muted-foreground">
+                No police error reversals found for this search.
+              </CardContent>
+            </Card>
+          ) : (
+            policeErrorResults.map((result) => {
+              const content = (
+                <Card key={result.clusterId} className="transition-colors hover:bg-muted/50">
+                  <CardContent className="py-4 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-4 min-w-0 flex-1">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100 text-red-700">
+                          <ShieldAlert className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="font-medium truncate">
+                            {result.caseName}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {result.docketNumber} &middot; {result.court}
+                            {result.county && ` &middot; ${result.county} County`}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4 shrink-0 ml-4">
+                        {result.outcome && (
+                          <Badge
+                            variant="outline"
+                            className={APPELLATE_OUTCOME_COLORS[result.outcome] || ""}
+                          >
+                            {APPELLATE_OUTCOME_LABELS[result.outcome] || result.outcome}
+                          </Badge>
+                        )}
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">Judge</div>
+                          <span className="text-sm font-medium truncate max-w-[150px] block">
+                            {result.judge || "—"}
+                          </span>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-xs text-muted-foreground">Filed</div>
+                          <span className="text-sm font-medium">
+                            {format(new Date(result.dateFiled), "MMM d, yyyy")}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    {result.snippet && result.snippet.length > 50 && (
+                      <p className="text-xs text-muted-foreground line-clamp-2 ml-14">
+                        {result.snippet}
+                      </p>
+                    )}
+                    <div className="flex gap-3 ml-14">
+                      {result.pdfUrl && (
+                        <a
+                          href={result.pdfUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-primary hover:underline"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          View PDF
+                        </a>
+                      )}
+                      <a
+                        href={result.sourceUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-xs text-primary hover:underline"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        CourtListener
+                      </a>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+              return result.id ? (
+                <Link key={result.clusterId} href={`/intelligence/opinions/${result.id}`}>
+                  {content}
+                </Link>
+              ) : (
+                <div key={result.clusterId}>{content}</div>
+              );
+            })
+          )
+        ) : filtered.length === 0 ? (
           <Card>
             <CardContent className="py-8 text-center text-muted-foreground">
               No opinions found matching your criteria.
