@@ -2,6 +2,7 @@
 
 import { useState, useCallback } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { format } from "date-fns";
 import { BookOpen, Search, Check, ChevronsUpDown, ShieldAlert, X, Loader2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -98,6 +99,7 @@ interface OpinionsData {
 }
 
 export function OpinionsClient({ data }: { data: OpinionsData }) {
+  const router = useRouter();
   const [search, setSearch] = useState("");
   const [courtFilter, setCourtFilter] = useState<string>("all");
   const [outcomeFilter, setOutcomeFilter] = useState<string>("all");
@@ -468,12 +470,14 @@ export function OpinionsClient({ data }: { data: OpinionsData }) {
                   </CardContent>
                 </Card>
               );
-              return result.id ? (
-                <Link key={result.clusterId} href={`/intelligence/opinions/${result.id}`}>
+              return (
+                <div
+                  key={result.clusterId}
+                  className={result.id ? "cursor-pointer" : undefined}
+                  onClick={result.id ? () => router.push(`/intelligence/opinions/${result.id}`) : undefined}
+                >
                   {content}
-                </Link>
-              ) : (
-                <div key={result.clusterId}>{content}</div>
+                </div>
               );
             })
           )
