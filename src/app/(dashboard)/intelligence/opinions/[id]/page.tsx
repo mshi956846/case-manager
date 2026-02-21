@@ -156,17 +156,6 @@ export default async function OpinionDetailPage({
                 </div>
               </div>
 
-              {opinion.summary && (
-                <div>
-                  <div className="text-xs text-muted-foreground mb-1">
-                    Summary / Snippet
-                  </div>
-                  <p
-                    className="text-sm leading-relaxed rounded-md border p-3 bg-muted/30"
-                    dangerouslySetInnerHTML={{ __html: opinion.summary }}
-                  />
-                </div>
-              )}
             </CardContent>
           </Card>
 
