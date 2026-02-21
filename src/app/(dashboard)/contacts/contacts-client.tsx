@@ -161,13 +161,16 @@ export function ContactsClient({
             </div>
             <Button
               variant="outline"
-              disabled={!lookupLast.trim()}
               onClick={() => {
-                const params = new URLSearchParams();
-                params.set("LastName", lookupLast.trim());
-                if (lookupFirst.trim()) params.set("FirstName", lookupFirst.trim());
+                const name = [lookupFirst.trim(), lookupLast.trim()]
+                  .filter(Boolean)
+                  .join(" ");
+                if (name) {
+                  navigator.clipboard.writeText(name);
+                  toast.success(`"${name}" copied — paste into the search on the next page`);
+                }
                 window.open(
-                  `https://courtapps.in.gov/rollofattorneys/Search/RefineSearch?${params.toString()}`,
+                  "https://courtapps.in.gov/rollofattorneys/search",
                   "_blank",
                   "noopener,noreferrer"
                 );
@@ -178,7 +181,7 @@ export function ContactsClient({
             </Button>
           </div>
           <p className="text-muted-foreground mt-2 text-xs">
-            Opens the Indiana Supreme Court Roll of Attorneys in a new tab.
+            Opens the Indiana Supreme Court Roll of Attorneys in a new tab. If a name is entered, it will be copied to your clipboard.
           </p>
         </CardContent>
       </Card>
