@@ -41,7 +41,7 @@ export default async function IntelligencePage() {
           <Scale className="h-5 w-5" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold">Court Intelligence</h1>
+          <h1 className="text-2xl font-bold">Indiana Criminal Appellate Opinions</h1>
           <p className="text-sm text-muted-foreground">
             Indiana court analytics & judicial intelligence
           </p>
@@ -105,7 +105,7 @@ export default async function IntelligencePage() {
         </CardHeader>
         <CardContent>
           <p className="text-sm text-muted-foreground">
-            Browse and search Indiana appellate opinions, with AI-generated case summaries and police error analysis.
+            Browse and search Indiana appellate opinions with case summaries and police error analysis.
           </p>
         </CardContent>
       </Card>
