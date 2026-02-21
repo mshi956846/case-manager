@@ -18,6 +18,8 @@ import {
   BorderStyle,
 } from "docx";
 import { COURT_FILING } from "./court-filing-config";
+import { format } from "date-fns";
+import { getFieldOptionSet } from "./tiptap-extensions/field-options";
 
 interface TipTapNode {
   type: string;
@@ -47,6 +49,37 @@ function getHeadingLevel(level: number) {
 }
 
 function processTextRuns(node: TipTapNode): TextRun[] {
+  if (node.type === "dateNode") {
+    const date = new Date(node.attrs?.date as string);
+    const fmt = node.attrs?.format as string;
+    const formatted =
+      fmt === "short"
+        ? format(date, "MM/dd/yyyy")
+        : format(date, "MMMM d, yyyy");
+    return [
+      new TextRun({
+        text: formatted,
+        font: COURT_FILING.font.family,
+        size: COURT_FILING.font.size * 2,
+      }),
+    ];
+  }
+
+  if (node.type === "dropdownField") {
+    const fieldType = node.attrs?.fieldType as string;
+    const selectedValue = node.attrs?.selectedValue as string;
+    const label = node.attrs?.label as string;
+    const optionSet = getFieldOptionSet(fieldType);
+    const selectedLabel = optionSet?.options.find((o) => o.value === selectedValue)?.label;
+    return [
+      new TextRun({
+        text: selectedLabel || `[Select ${label}]`,
+        font: COURT_FILING.font.family,
+        size: COURT_FILING.font.size * 2,
+      }),
+    ];
+  }
+
   if (node.text) {
     const marks = node.marks || [];
     const bold = marks.some((m) => m.type === "bold");

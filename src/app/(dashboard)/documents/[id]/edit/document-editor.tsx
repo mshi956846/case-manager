@@ -14,6 +14,8 @@ import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
+import { DateNode } from "@/lib/tiptap-extensions/date-node";
+import { DropdownField } from "@/lib/tiptap-extensions/dropdown-field";
 import { toast } from "sonner";
 import { ArrowLeft, Save, FileDown, Gavel } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -58,6 +60,8 @@ export function DocumentEditor({ document: initialDoc }: DocumentEditorProps) {
       TableRow,
       TableCell,
       TableHeader,
+      DateNode,
+      DropdownField,
     ],
     content: initialDoc.content || { type: "doc", content: [{ type: "paragraph" }] },
     onUpdate: ({ editor }) => {

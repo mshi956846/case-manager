@@ -1,5 +1,6 @@
 import { DocumentWizardValues } from "@/lib/validations/document-wizard";
 import { findDocumentType } from "@/lib/document-types";
+import { getMotionTemplateBody } from "@/lib/motion-templates";
 
 interface TipTapNode {
   type: string;
@@ -162,6 +163,23 @@ export function buildDocumentFromWizard(data: DocumentWizardValues): WizardDocum
   const templateTitle = docType?.templateTitle ?? "UNTITLED DOCUMENT";
   const label = docType?.label ?? "Document";
 
+  // Check for a motion-specific template; fall back to generic placeholder
+  const specificBody = getMotionTemplateBody(data.documentTypeId, data);
+
+  const bodyNodes: TipTapNode[] = specificBody
+    ? [
+        ...specificBody,
+        paragraph(),
+        buildPrayerParagraph(data),
+      ]
+    : [
+        buildOpeningParagraph(data),
+        paragraph(),
+        buildNumberedPlaceholder(),
+        paragraph(),
+        buildPrayerParagraph(data),
+      ];
+
   const content: TipTapNode = {
     type: "doc",
     content: [
@@ -169,11 +187,7 @@ export function buildDocumentFromWizard(data: DocumentWizardValues): WizardDocum
       paragraph(),
       buildTitle(templateTitle),
       paragraph(),
-      buildOpeningParagraph(data),
-      paragraph(),
-      buildNumberedPlaceholder(),
-      paragraph(),
-      buildPrayerParagraph(data),
+      ...bodyNodes,
       paragraph(),
       ...buildSignatureBlock(),
       paragraph(),

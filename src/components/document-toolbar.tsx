@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Editor } from "@tiptap/react";
 import {
   Bold,
@@ -16,16 +17,26 @@ import {
   ListOrdered,
   Undo,
   Redo,
+  Calendar,
+  ListFilter,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import {
+  Popover,
+  PopoverTrigger,
+  PopoverContent,
+} from "@/components/ui/popover";
+import { InsertFieldMenu } from "@/components/insert-field-menu";
 
 interface DocumentToolbarProps {
   editor: Editor | null;
 }
 
 export function DocumentToolbar({ editor }: DocumentToolbarProps) {
+  const [fieldMenuOpen, setFieldMenuOpen] = useState(false);
+
   if (!editor) return null;
 
   const items = [
@@ -178,6 +189,41 @@ export function DocumentToolbar({ editor }: DocumentToolbarProps) {
           ))}
         </div>
       ))}
+
+      {/* Insert Date & Field */}
+      <Separator orientation="vertical" className="mx-1 h-6" />
+      <div className="flex items-center gap-0.5">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="h-8 w-8"
+          onClick={() => editor.chain().focus().insertDate().run()}
+          title="Insert Date"
+          type="button"
+        >
+          <Calendar className="h-4 w-4" />
+        </Button>
+
+        <Popover open={fieldMenuOpen} onOpenChange={setFieldMenuOpen}>
+          <PopoverTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8"
+              title="Insert Field"
+              type="button"
+            >
+              <ListFilter className="h-4 w-4" />
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-56 p-0" align="start">
+            <InsertFieldMenu
+              editor={editor}
+              onClose={() => setFieldMenuOpen(false)}
+            />
+          </PopoverContent>
+        </Popover>
+      </div>
     </div>
   );
 }

@@ -10,6 +10,8 @@ import { Table } from "@tiptap/extension-table";
 import { TableRow } from "@tiptap/extension-table-row";
 import { TableCell } from "@tiptap/extension-table-cell";
 import { TableHeader } from "@tiptap/extension-table-header";
+import { DateNode } from "@/lib/tiptap-extensions/date-node";
+import { DropdownField } from "@/lib/tiptap-extensions/dropdown-field";
 
 interface PreviewEditorProps {
   content: Record<string, unknown> | null;
@@ -29,6 +31,8 @@ export function PreviewEditor({ content }: PreviewEditorProps) {
       TableRow,
       TableCell,
       TableHeader,
+      DateNode,
+      DropdownField,
     ],
     content: content || { type: "doc", content: [{ type: "paragraph" }] },
     editable: false,

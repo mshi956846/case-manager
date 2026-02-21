@@ -8,6 +8,8 @@ import {
 } from "@react-pdf/renderer";
 import { createElement } from "react";
 import { COURT_FILING, INCHES_TO_PT } from "./court-filing-config";
+import { format } from "date-fns";
+import { getFieldOptionSet } from "./tiptap-extensions/field-options";
 
 interface TipTapNode {
   type: string;
@@ -106,6 +108,37 @@ function getAlignStyle(attrs?: Record<string, unknown>) {
 }
 
 function renderTextRuns(node: TipTapNode): React.ReactElement[] {
+  if (node.type === "dateNode") {
+    const date = new Date(node.attrs?.date as string);
+    const fmt = node.attrs?.format as string;
+    const formatted =
+      fmt === "short"
+        ? format(date, "MM/dd/yyyy")
+        : format(date, "MMMM d, yyyy");
+    return [
+      createElement(
+        Text,
+        { key: Math.random().toString(36) },
+        formatted
+      ),
+    ];
+  }
+
+  if (node.type === "dropdownField") {
+    const fieldType = node.attrs?.fieldType as string;
+    const selectedValue = node.attrs?.selectedValue as string;
+    const label = node.attrs?.label as string;
+    const optionSet = getFieldOptionSet(fieldType);
+    const selectedLabel = optionSet?.options.find((o) => o.value === selectedValue)?.label;
+    return [
+      createElement(
+        Text,
+        { key: Math.random().toString(36) },
+        selectedLabel || `[Select ${label}]`
+      ),
+    ];
+  }
+
   if (node.text) {
     const marks = node.marks || [];
     const isBold = marks.some((m) => m.type === "bold");
