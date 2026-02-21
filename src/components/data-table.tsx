@@ -26,6 +26,7 @@ interface DataTableProps<TData, TValue> {
   data: TData[];
   searchKey?: string;
   searchPlaceholder?: string;
+  toolbarExtra?: React.ReactNode;
 }
 
 export function DataTable<TData, TValue>({
@@ -33,6 +34,7 @@ export function DataTable<TData, TValue>({
   data,
   searchKey,
   searchPlaceholder = "Search...",
+  toolbarExtra,
 }: DataTableProps<TData, TValue>) {
   const [globalFilter, setGlobalFilter] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -53,17 +55,22 @@ export function DataTable<TData, TValue>({
 
   return (
     <div className="space-y-4">
-      {searchKey !== undefined && (
-        <Input
-          placeholder={searchPlaceholder}
-          value={
-            (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
-          }
-          onChange={(e) =>
-            table.getColumn(searchKey)?.setFilterValue(e.target.value)
-          }
-          className="max-w-sm"
-        />
+      {(searchKey !== undefined || toolbarExtra) && (
+        <div className="flex items-center gap-2">
+          {searchKey !== undefined && (
+            <Input
+              placeholder={searchPlaceholder}
+              value={
+                (table.getColumn(searchKey)?.getFilterValue() as string) ?? ""
+              }
+              onChange={(e) =>
+                table.getColumn(searchKey)?.setFilterValue(e.target.value)
+              }
+              className="max-w-sm"
+            />
+          )}
+          {toolbarExtra}
+        </div>
       )}
       <div className="rounded-md border">
         <Table>

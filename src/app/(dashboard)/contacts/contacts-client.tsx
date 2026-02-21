@@ -16,7 +16,6 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ContactForm } from "./contact-form";
 
@@ -131,11 +130,12 @@ export function ContactsClient({
           Add Contact
         </Button>
       </div>
-      <Card>
-        <CardHeader>
-          <CardTitle>Indiana Attorney Lookup</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <DataTable
+        columns={columns}
+        data={contacts}
+        searchKey="name"
+        searchPlaceholder="Search contacts..."
+        toolbarExtra={
           <Button
             variant="outline"
             onClick={() => {
@@ -149,16 +149,7 @@ export function ContactsClient({
             <ExternalLink className="mr-2 h-4 w-4" />
             Search Roll of Attorneys
           </Button>
-          <p className="text-muted-foreground mt-2 text-xs">
-            Opens the Indiana Supreme Court Roll of Attorneys in a new tab.
-          </p>
-        </CardContent>
-      </Card>
-      <DataTable
-        columns={columns}
-        data={contacts}
-        searchKey="name"
-        searchPlaceholder="Search contacts..."
+        }
       />
       <ContactForm
         open={formOpen}
