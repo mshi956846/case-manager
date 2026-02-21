@@ -42,8 +42,7 @@ export function ContactsClient({
   const [editing, setEditing] = useState<Contact | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [lookupFirst, setLookupFirst] = useState("");
-  const [lookupLast, setLookupLast] = useState("");
+  const [lookupName, setLookupName] = useState("");
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -142,32 +141,20 @@ export function ContactsClient({
         <CardContent>
           <div className="flex flex-wrap items-end gap-3">
             <div className="grid gap-1.5">
-              <Label htmlFor="lookup-last">Last Name</Label>
+              <Label htmlFor="lookup-name">Name</Label>
               <Input
-                id="lookup-last"
-                placeholder="e.g. Koch"
-                value={lookupLast}
-                onChange={(e) => setLookupLast(e.target.value)}
-              />
-            </div>
-            <div className="grid gap-1.5">
-              <Label htmlFor="lookup-first">First Name</Label>
-              <Input
-                id="lookup-first"
-                placeholder="e.g. Glen"
-                value={lookupFirst}
-                onChange={(e) => setLookupFirst(e.target.value)}
+                id="lookup-name"
+                placeholder="e.g. Glen Koch"
+                value={lookupName}
+                onChange={(e) => setLookupName(e.target.value)}
               />
             </div>
             <Button
               variant="outline"
               onClick={() => {
-                const name = [lookupFirst.trim(), lookupLast.trim()]
-                  .filter(Boolean)
-                  .join(" ");
-                if (name) {
-                  navigator.clipboard.writeText(name);
-                  toast.success(`"${name}" copied — paste into the search on the next page`);
+                if (lookupName.trim()) {
+                  navigator.clipboard.writeText(lookupName.trim());
+                  toast.success(`"${lookupName.trim()}" copied — paste into the search on the next page`);
                 }
                 window.open(
                   "https://courtapps.in.gov/rollofattorneys/search",
