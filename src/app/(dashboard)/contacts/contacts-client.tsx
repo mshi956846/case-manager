@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { ColumnDef } from "@tanstack/react-table";
 import { Contact, ContactType } from "@prisma/client";
-import { MoreHorizontal, Plus } from "lucide-react";
+import { ExternalLink, MoreHorizontal, Plus } from "lucide-react";
 import { toast } from "sonner";
 import { DataTable } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ContactForm } from "./contact-form";
 
@@ -39,6 +42,8 @@ export function ContactsClient({
   const [editing, setEditing] = useState<Contact | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [lookupFirst, setLookupFirst] = useState("");
+  const [lookupLast, setLookupLast] = useState("");
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -130,6 +135,53 @@ export function ContactsClient({
           Add Contact
         </Button>
       </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Indiana Attorney Lookup</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="grid gap-1.5">
+              <Label htmlFor="lookup-last">Last Name</Label>
+              <Input
+                id="lookup-last"
+                placeholder="e.g. Koch"
+                value={lookupLast}
+                onChange={(e) => setLookupLast(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-1.5">
+              <Label htmlFor="lookup-first">First Name</Label>
+              <Input
+                id="lookup-first"
+                placeholder="e.g. Glen"
+                value={lookupFirst}
+                onChange={(e) => setLookupFirst(e.target.value)}
+              />
+            </div>
+            <Button
+              variant="outline"
+              disabled={!lookupLast.trim()}
+              onClick={() => {
+                const params = new URLSearchParams();
+                params.set("LastName", lookupLast.trim());
+                if (lookupFirst.trim()) params.set("FirstName", lookupFirst.trim());
+                window.open(
+                  `https://courtapps.in.gov/rollofattorneys/Search/RefineSearch?${params.toString()}`,
+                  "_blank",
+                  "noopener,noreferrer"
+                );
+              }}
+            >
+              <ExternalLink className="mr-2 h-4 w-4" />
+              Search Roll of Attorneys
+            </Button>
+          </div>
+          <p className="text-muted-foreground mt-2 text-xs">
+            Opens the Indiana Supreme Court Roll of Attorneys in a new tab.
+          </p>
+        </CardContent>
+      </Card>
       <DataTable
         columns={columns}
         data={contacts}
