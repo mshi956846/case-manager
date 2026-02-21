@@ -220,7 +220,7 @@ export default async function CLOpinionDetailPage({
           {clusterId === "10794478" && (
             <Card>
               <CardHeader>
-                <CardTitle className="text-base">Motion Practice</CardTitle>
+                <CardTitle className="text-base">Suppression Pleadings and Order — {searchResult.docketNumber}</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-wrap gap-3">
                 <a href="/docs/sample-motions/motion-to-suppress.pdf" download>
