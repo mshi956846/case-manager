@@ -17,8 +17,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ConfirmDialog } from "@/components/confirm-dialog";
 import { ContactForm } from "./contact-form";
 
@@ -42,7 +40,6 @@ export function ContactsClient({
   const [editing, setEditing] = useState<Contact | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
-  const [lookupName, setLookupName] = useState("");
 
   async function handleDelete() {
     if (!deleteId) return;
@@ -139,36 +136,21 @@ export function ContactsClient({
           <CardTitle>Indiana Attorney Lookup</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-wrap items-end gap-3">
-            <div className="grid gap-1.5">
-              <Label htmlFor="lookup-name">Name</Label>
-              <Input
-                id="lookup-name"
-                placeholder="e.g. Glen Koch"
-                value={lookupName}
-                onChange={(e) => setLookupName(e.target.value)}
-              />
-            </div>
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (lookupName.trim()) {
-                  navigator.clipboard.writeText(lookupName.trim());
-                  toast.success(`"${lookupName.trim()}" copied — paste into the search on the next page`);
-                }
-                window.open(
-                  "https://courtapps.in.gov/rollofattorneys/search",
-                  "_blank",
-                  "noopener,noreferrer"
-                );
-              }}
-            >
-              <ExternalLink className="mr-2 h-4 w-4" />
-              Search Roll of Attorneys
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            onClick={() => {
+              window.open(
+                "https://courtapps.in.gov/rollofattorneys/search",
+                "_blank",
+                "noopener,noreferrer"
+              );
+            }}
+          >
+            <ExternalLink className="mr-2 h-4 w-4" />
+            Search Roll of Attorneys
+          </Button>
           <p className="text-muted-foreground mt-2 text-xs">
-            Opens the Indiana Supreme Court Roll of Attorneys in a new tab. If a name is entered, it will be copied to your clipboard.
+            Opens the Indiana Supreme Court Roll of Attorneys in a new tab.
           </p>
         </CardContent>
       </Card>
