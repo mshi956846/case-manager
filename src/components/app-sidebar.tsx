@@ -14,7 +14,9 @@ import {
   Clock,
   FileText,
   FileEdit,
+  DollarSign,
   LogOut,
+  Scale,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -22,13 +24,15 @@ import { Separator } from "@/components/ui/separator";
 
 const navItems = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/contacts", label: "Contacts", icon: Users },
   { href: "/matters", label: "Cases", icon: Briefcase },
   { href: "/calendar", label: "Calendar", icon: Calendar },
-  { href: "/documents", label: "Documents", icon: FileEdit },
   { href: "/tasks", label: "Tasks", icon: CheckSquare },
+  { href: "/documents", label: "Documents", icon: FileEdit },
   { href: "/time-tracking", label: "Time Tracking", icon: Clock },
   { href: "/invoices", label: "Invoices", icon: FileText },
+  { href: "/accounting", label: "Accounting", icon: DollarSign },
+  { href: "/contacts", label: "Contacts", icon: Users },
+  { href: "/intelligence", label: "Precedent", icon: Scale },
 ];
 
 export function AppSidebar() {
