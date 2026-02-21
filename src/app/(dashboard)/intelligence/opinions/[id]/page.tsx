@@ -26,6 +26,7 @@ import {
   APPELLATE_OUTCOME_COLORS,
   OFFENSE_CATEGORY_LABELS,
 } from "@/lib/intelligence-constants";
+import { AppellateSummary } from "./appellate-summary";
 
 async function getOpinion(id: string) {
   const opinion = await prisma.appellateOpinion.findUnique({
@@ -168,6 +169,11 @@ export default async function OpinionDetailPage({
               )}
             </CardContent>
           </Card>
+
+          <AppellateSummary
+            courtListenerId={opinion.courtListenerId}
+            caseName={opinion.caseName}
+          />
 
           {opinion.pdfUrl && (
             <Card>
